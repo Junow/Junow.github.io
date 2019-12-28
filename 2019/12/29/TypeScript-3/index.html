@@ -1,0 +1,651 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="Junow">
+    <title>TypeScript-3 - Junow</title>
+    <meta name="author" content="Junow">
+    
+    
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Junow","sameAs":["https://github.com/junow","mailto taristmas@gmail.com"]},"articleBody":"type script에 대해 알아보자 (3) - type\n\n\n\n\n타입스크립트는 사용자가 자바스크립에서 기대하는것과 같은 타입들(숫자, 문자열, 구조, 부울) 을 지원한다.​ 타입 선언을 통해 개발자가 코드를 예측가능할 수 있도록 도와주고 문법 에러나 타입과 일치하지 않는 값의 할당 등 기본적인 오류를 런타임 이전에 찾아낼 수 있다.\nBoolean1let isDone: boolean = false;\n\nNumber1234let decimal: number = 6;let hex: number = 0xf00d;let binary: number = 0b1010;let octal: number = 0o744;\n\nString\ntemplate string 을 이용해서도 물론 가능\n\n12let age: number = 25;let introduce: string = `i'm junow and i'm $&#123;age&#125;`;\n\nArray\n두가지 방식이 있다.\n두번째는 제네릭 배열 타입 사용₩\n\n123let arr: number[] = [1, 2, 3];arr.push(4);arr.push(5);\n\n1let arr: Array&lt;number&gt; = [1, 2, 3];\n\nTuple\n튜플은 고정된 개수의 요소 타입을 알고 있지만 반드시 같을 필요는 없는 배열을 나타낼 때 사용\n\n12let x: [string, number];x = [\"hello\", 123];\n\nEnum123456789enum Color &#123;  Red = 1,  Green = 2,  Blue = 4&#125;let red: Color = Color.Red; // 1let blue: string = Color[4]; // Blue\n\nAny\n해당값의 타입을 모를경우 사용가능\n너무 남발하면 코드 분석에 타입체의 도움은 받을 수 없으므로 주의\n\n123456let notSure: any = 4;notSure.ifItExists(); // 런타임에 존재할수도 있음notSure.toFixed(); // 런타임에 존재할수도 있음 (any 라서 컴파일러가 체크하지는 않음 )let prettySure: Object = 4;// prettySure.toFixed(); // 여기서는 컴파일러가 체크해서 오류뱉음 any가 아니라\n\nVoid\nany 와 비슷하지만 어떤 타입의 부재도 전혀 없다.\n일반적으로 반환 값이 없는 함수의 반환타입으로 쓰일 수 있다.\n하지만 void 타입의 변수는 undefined 만 할당할 수 있으므로 유용하지 않다. (null 도 가능하다고 하나 안됨)\n\n12345function warnUser(): void &#123;  console.error(\"This is my warning message\");&#125;let num: void = undefined; // 가능let str: void = \"123\"; // 에러\n\n참조\nhttps://poiemaweb.com/typescript-typing\n\nhttps://typescript-kr.github.io/pages/Basic%20Types.html\n\nhttps://engineering.huiseoul.com/타입스크립트-기본-타입-a83401d414d8\n\n\n","dateCreated":"2019-12-29T07:06:26+09:00","dateModified":"2019-12-29T07:08:25+09:00","datePublished":"2019-12-29T07:06:26+09:00","description":"type script에 대해 알아보자 (3) - type\n","headline":"TypeScript-3","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"http://yoursite.com/2019/12/29/TypeScript-3/"},"publisher":{"@type":"Organization","name":"Junow","sameAs":["https://github.com/junow","mailto taristmas@gmail.com"]},"url":"http://yoursite.com/2019/12/29/TypeScript-3/","keywords":"JavaScript, TypeScript"}</script>
+    <meta name="description" content="type script에 대해 알아보자 (3) - type">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="TypeScript-3">
+<meta property="og:url" content="http://yoursite.com/2019/12/29/TypeScript-3/index.html">
+<meta property="og:site_name" content="Junow">
+<meta property="og:description" content="type script에 대해 알아보자 (3) - type">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:image" content="http://yoursite.com/2019/12/29/TypeScript-3/typescript.png">
+<meta property="article:published_time" content="2019-12-28T22:06:26.000Z">
+<meta property="article:modified_time" content="2019-12-28T22:08:25.547Z">
+<meta property="article:author" content="Junow">
+<meta property="article:tag" content="JavaScript">
+<meta property="article:tag" content="TypeScript">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/2019/12/29/TypeScript-3/typescript.png">
+    
+    
+        
+    
+    
+    
+    
+    
+    <!--STYLES-->
+    
+<link rel="stylesheet" href="/assets/css/all.css">
+
+    
+<link rel="stylesheet" href="/assets/css/jquery.fancybox.css">
+
+    
+<link rel="stylesheet" href="/assets/css/thumbs.css">
+
+    
+<link rel="stylesheet" href="/assets/css/tranquilpeak.css">
+
+    <!--STYLES END-->
+    
+
+    
+
+    
+        
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+
+<header id="header" data-behavior="5">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a
+            class="header-title-link"
+            href="/%20"
+            aria-label=""
+        >
+            Junow
+        </a>
+    </div>
+    
+        
+            <a
+                class="header-right-picture "
+                href="#about"
+                aria-label="링크 열기: /#about"
+            >
+        
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+ 
+<nav id="sidebar" data-behavior="5">
+  <div class="sidebar-container">
+     
+    <ul class="sidebar-buttons">
+      
+      <li class="sidebar-button">
+         <a class="sidebar-button-link "  href="/"
+           title="Home" > 
+          <i
+            class="sidebar-button-icon fa fa-home"
+            aria-hidden="true"
+          ></i>
+          <span class="sidebar-button-desc"
+            >Home</span
+          >
+        </a>
+      </li>
+      
+      <li class="sidebar-button">
+         <a class="sidebar-button-link " 
+          href="/all-categories"  title="카테고리" > 
+          <i
+            class="sidebar-button-icon fa fa-bookmark"
+            aria-hidden="true"
+          ></i>
+          <span class="sidebar-button-desc"
+            >카테고리</span
+          >
+        </a>
+      </li>
+      
+      <li class="sidebar-button">
+         <a class="sidebar-button-link " 
+          href="/all-tags"  title="태그" > 
+          <i
+            class="sidebar-button-icon fa fa-tags"
+            aria-hidden="true"
+          ></i>
+          <span class="sidebar-button-desc"
+            >태그</span
+          >
+        </a>
+      </li>
+      
+      <li class="sidebar-button">
+         <a class="sidebar-button-link open-algolia-search" 
+          href="#search"  title="검색" > 
+          <i
+            class="sidebar-button-icon fa fa-search"
+            aria-hidden="true"
+          ></i>
+          <span class="sidebar-button-desc"
+            >검색</span
+          >
+        </a>
+      </li>
+      
+    </ul>
+    
+    <ul class="sidebar-buttons">
+      
+      <li class="sidebar-button">
+        
+        <a
+          class="sidebar-button-link "
+          href="https://github.com/junow"
+          target="_blank"
+          rel="noopener"
+          title="GitHub"
+        >
+          
+          <i
+            class="sidebar-button-icon fab fa-github"
+            aria-hidden="true"
+          ></i>
+          <span class="sidebar-button-desc"
+            >GitHub</span
+          >
+        </a>
+      </li>
+      
+      <li class="sidebar-button">
+         <a class="sidebar-button-link "  href="/mailto%20taristmas@gmail.com" title="Mail" > 
+          <i
+            class="sidebar-button-icon fa fa-envelope"
+            aria-hidden="true"
+          ></i>
+          <span class="sidebar-button-desc"
+            >Mail</span
+          >
+        </a>
+      </li>
+      
+    </ul>
+    
+  </div>
+</nav>
+
+            
+            <div id="main" data-behavior="5"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            TypeScript-3
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2019-12-29T07:06:26+09:00">
+	
+		    2019/12/29
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/categories/web/">web</a>
+
+
+    
+</div>
+
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <p>type script에 대해 알아보자 (3) - type</p>
+<img src="/2019/12/29/TypeScript-3/typescript.png" class="">
+
+<a id="more"></a>
+
+<h2 id="타입스크립트는-사용자가-자바스크립에서-기대하는것과-같은-타입들-숫자-문자열-구조-부울-을-지원한다"><a href="#타입스크립트는-사용자가-자바스크립에서-기대하는것과-같은-타입들-숫자-문자열-구조-부울-을-지원한다" class="headerlink" title="타입스크립트는 사용자가 자바스크립에서 기대하는것과 같은 타입들(숫자, 문자열, 구조, 부울) 을 지원한다."></a>타입스크립트는 사용자가 자바스크립에서 기대하는것과 같은 타입들(숫자, 문자열, 구조, 부울) 을 지원한다.</h2><p>​ 타입 선언을 통해 개발자가 코드를 예측가능할 수 있도록 도와주고 문법 에러나 타입과 일치하지 않는 값의 할당 등 기본적인 오류를 런타임 이전에 찾아낼 수 있다.</p>
+<h2 id="Boolean"><a href="#Boolean" class="headerlink" title="Boolean"></a>Boolean</h2><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> isDone: <span class="built_in">boolean</span> = <span class="literal">false</span>;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Number"><a href="#Number" class="headerlink" title="Number"></a>Number</h2><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> decimal: <span class="built_in">number</span> = <span class="number">6</span>;</span><br><span class="line"><span class="keyword">let</span> hex: <span class="built_in">number</span> = <span class="number">0xf00d</span>;</span><br><span class="line"><span class="keyword">let</span> binary: <span class="built_in">number</span> = <span class="number">0b1010</span>;</span><br><span class="line"><span class="keyword">let</span> octal: <span class="built_in">number</span> = <span class="number">0o744</span>;</span><br></pre></td></tr></table></figure>
+
+<h2 id="String"><a href="#String" class="headerlink" title="String"></a>String</h2><ul>
+<li><code>template string</code> 을 이용해서도 물론 가능</li>
+</ul>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> age: <span class="built_in">number</span> = <span class="number">25</span>;</span><br><span class="line"><span class="keyword">let</span> introduce: <span class="built_in">string</span> = <span class="string">`i'm junow and i'm <span class="subst">$&#123;age&#125;</span>`</span>;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Array"><a href="#Array" class="headerlink" title="Array"></a>Array</h2><ul>
+<li>두가지 방식이 있다.</li>
+<li>두번째는 제네릭 배열 타입 사용₩</li>
+</ul>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> arr: <span class="built_in">number</span>[] = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>];</span><br><span class="line">arr.push(<span class="number">4</span>);</span><br><span class="line">arr.push(<span class="number">5</span>);</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> arr: <span class="built_in">Array</span>&lt;<span class="built_in">number</span>&gt; = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>];</span><br></pre></td></tr></table></figure>
+
+<h2 id="Tuple"><a href="#Tuple" class="headerlink" title="Tuple"></a>Tuple</h2><ul>
+<li>튜플은 고정된 개수의 요소 타입을 알고 있지만 반드시 같을 필요는 없는 배열을 나타낼 때 사용</li>
+</ul>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> x: [<span class="built_in">string</span>, <span class="built_in">number</span>];</span><br><span class="line">x = [<span class="string">"hello"</span>, <span class="number">123</span>];</span><br></pre></td></tr></table></figure>
+
+<h2 id="Enum"><a href="#Enum" class="headerlink" title="Enum"></a>Enum</h2><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">enum</span> Color &#123;</span><br><span class="line">  Red = <span class="number">1</span>,</span><br><span class="line">  Green = <span class="number">2</span>,</span><br><span class="line">  Blue = <span class="number">4</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> red: Color = Color.Red; <span class="comment">// 1</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> blue: <span class="built_in">string</span> = Color[<span class="number">4</span>]; <span class="comment">// Blue</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="Any"><a href="#Any" class="headerlink" title="Any"></a>Any</h2><ul>
+<li>해당값의 타입을 모를경우 사용가능</li>
+<li>너무 남발하면 코드 분석에 타입체의 도움은 받을 수 없으므로 주의</li>
+</ul>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> notSure: <span class="built_in">any</span> = <span class="number">4</span>;</span><br><span class="line">notSure.ifItExists(); <span class="comment">// 런타임에 존재할수도 있음</span></span><br><span class="line">notSure.toFixed(); <span class="comment">// 런타임에 존재할수도 있음 (any 라서 컴파일러가 체크하지는 않음 )</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> prettySure: <span class="built_in">Object</span> = <span class="number">4</span>;</span><br><span class="line"><span class="comment">// prettySure.toFixed(); // 여기서는 컴파일러가 체크해서 오류뱉음 any가 아니라</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="Void"><a href="#Void" class="headerlink" title="Void"></a>Void</h2><ul>
+<li><code>any</code> 와 비슷하지만 어떤 타입의 부재도 전혀 없다.</li>
+<li>일반적으로 반환 값이 없는 함수의 반환타입으로 쓰일 수 있다.</li>
+<li>하지만 <code>void</code> 타입의 변수는 <code>undefined</code> 만 할당할 수 있으므로 유용하지 않다. (<code>null</code> 도 가능하다고 하나 안됨)</li>
+</ul>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">warnUser</span>(<span class="params"></span>): <span class="title">void</span> </span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.error(<span class="string">"This is my warning message"</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">let</span> num: <span class="built_in">void</span> = <span class="literal">undefined</span>; <span class="comment">// 가능</span></span><br><span class="line"><span class="keyword">let</span> str: <span class="built_in">void</span> = <span class="string">"123"</span>; <span class="comment">// 에러</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="참조"><a href="#참조" class="headerlink" title="참조"></a>참조</h2><ul>
+<li><p><a href="https://poiemaweb.com/typescript-typing" target="_blank" rel="noopener">https://poiemaweb.com/typescript-typing</a></p>
+</li>
+<li><p><a href="https://typescript-kr.github.io/pages/Basic%20Types.html" target="_blank" rel="noopener">https://typescript-kr.github.io/pages/Basic%20Types.html</a></p>
+</li>
+<li><p><a href="https://engineering.huiseoul.com/타입스크립트-기본-타입-a83401d414d8" target="_blank" rel="noopener">https://engineering.huiseoul.com/타입스크립트-기본-타입-a83401d414d8</a></p>
+</li>
+</ul>
+
+            
+
+
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">태그</span><br/>
+                
+    <a class="tag tag--primary tag--small t-link" href="/tags/JavaScript/" rel="tag">JavaScript</a> <a class="tag tag--primary tag--small t-link" href="/tags/TypeScript/" rel="tag">TypeScript</a>
+
+            </div>
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2019/12/29/TypeScript-4/"
+                    data-tooltip="TypeScript-4"
+                    aria-label="이전: TypeScript-4"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2019/12/29/TypeScript-2/"
+                    data-tooltip="TypeScript-2"
+                    aria-label="다음: TypeScript-2"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://yoursite.com/2019/12/29/TypeScript-3/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=http://yoursite.com/2019/12/29/TypeScript-3/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=http://yoursite.com/2019/12/29/TypeScript-3/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+                <li class="post-action">
+                    <a
+                        class="post-action-btn btn btn--default"
+                        href="#disqus_thread"
+                        aria-label="댓글을 남겨주세요"
+                    >
+                        <i class="fa fa-comment"></i>
+                    </a>
+                </li>
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        
+            
+                <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript" target="_blank" rel="noopener">comments powered by Disqus.</a></noscript>
+</div>
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2019 Junow. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="5">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2019/12/29/TypeScript-4/"
+                    data-tooltip="TypeScript-4"
+                    aria-label="이전: TypeScript-4"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2019/12/29/TypeScript-2/"
+                    data-tooltip="TypeScript-2"
+                    aria-label="다음: TypeScript-2"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://yoursite.com/2019/12/29/TypeScript-3/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=http://yoursite.com/2019/12/29/TypeScript-3/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=http://yoursite.com/2019/12/29/TypeScript-3/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+                <li class="post-action">
+                    <a
+                        class="post-action-btn btn btn--default"
+                        href="#disqus_thread"
+                        aria-label="댓글을 남겨주세요"
+                    >
+                        <i class="fa fa-comment"></i>
+                    </a>
+                </li>
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="5">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=http://yoursite.com/2019/12/29/TypeScript-3/"
+                        aria-label="Facebook에 공유하기"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>Facebook에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=http://yoursite.com/2019/12/29/TypeScript-3/"
+                        aria-label="Twitter에 공유하기"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>Twitter에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=http://yoursite.com/2019/12/29/TypeScript-3/"
+                        aria-label="Google+에 공유하기"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>Google+에 공유하기</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
+            
+        </div>
+        
+
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <h4 id="about-card-name">Junow</h4>
+        
+            <div id="about-card-bio"><p>author.bio</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>author.job</p>
+
+            </div>
+        
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/assets/images/cover-v1.2.0.jpg');"></div>
+        <!--SCRIPTS-->
+
+<script src="/assets/js/jquery.js"></script>
+
+
+<script src="/assets/js/jquery.fancybox.js"></script>
+
+
+<script src="/assets/js/thumbs.js"></script>
+
+
+<script src="/assets/js/tranquilpeak.js"></script>
+
+<!--SCRIPTS END-->
+
+
+    
+        <script>
+          var disqus_config = function() {
+            this.page.url = 'http://yoursite.com/2019/12/29/TypeScript-3/';
+              
+            this.page.identifier = '2019/12/29/TypeScript-3/';
+              
+          };
+          (function() {
+            var d = document, s = d.createElement('script');
+            var disqus_shortname = 'junow';
+            s.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+          })();
+        </script>
+    
+
+
+
+
+    </body>
+</html>

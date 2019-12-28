@@ -1,0 +1,669 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="Junow">
+    <title>nginx - Junow</title>
+    <meta name="author" content="Junow">
+    
+    
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Junow","sameAs":["https://github.com/junow","mailto taristmas@gmail.com"]},"articleBody":"배포하는데 필요한 것들을 공부해보자\n\n\n\n기본 설정파일 경로는 /etc/nginx/nginx.conf\n\n123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354555657585960616263646566676869707172737475767778798081828384858687888990919293949596# 이 설정은 worker process가 root권한으로 실행되게 한다. 파일 시스템의 모든 권한을 얻게되므로 보안상 위험하다.user root;# 워커 프로세스는 CPU core 수에 따라 설정해야한다. nginx는 그 이상의 이득을 주지는 않는다.# 기본값은 1이지만 CPU가 2개이상의 코어를 갖는다면 이 값을 증가시키도록 권장한다.# auto - 자동적으로 계산한다.worker_processes auto;pid /run/nginx.pid;# 연결 처리에 영향을주는 지시문이 지정되는 구성 파일 컨텍스트를 제공한다.events &#123;  # 워커 하나가 몇명의 유저가 서비스를 할지 결정한다.  # max clients = worker_connections * worker_processes  # max clients 는 시스템에서 연결가능한 소켓 개수에 따라 제한한다. (~64k) \tworker_connections 1024;\t# multi_accept on;  # 테스팅 환경을 위해 각 스레드마다 많은 클라이언트를 서비스하도록 최적화한다.  # use epoll;&#125;http &#123;\t##\t# Basic Settings\t##\tsendfile on;\ttcp_nopush on;\ttcp_nodelay on;\tkeepalive_timeout 65;\ttypes_hash_max_size 2048;\t# Nginx의 버전을 숨길것인가에 대한 옵션이다. 보안상 주석을 제거하여 설정하는 것이 좋다.\t# server_tokens off;\t# server_names_hash_bucket_size 64;\t# server_name_in_redirect off;  # include 는 이름 그대로 특정 파일을 포함시키는 역할을 한다.  # include 지시어가 있는 위치에 해당 파일의 내용을 삽입한다.\tinclude /etc/nginx/mime.types;\tdefault_type application/octet-stream;\t##\t# SSL Settings\t##\tssl_protocols TLSv1 TLSv1.1 TLSv1.2; # Dropping SSLv3, ref: POODLE\tssl_prefer_server_ciphers on;\t##\t# Logging Settings\t##  # 참조 1에 따르면 HDD에 대한 I/O 성능을 높이기 위해 off 할 수도 있다.  # ex) off;  access_log /var/log/nginx/access.log;  # 에러 로그 파일을 저장할 위치  # 참조 1에 따르면 끝에 crit 옵션을 주어서 성능을 높일 수 있다고 한다.  # ex) error_log /var/log/nginx/error.log crit;\terror_log /var/log/nginx/error.log;\t##\t# Gzip Settings\t##\tgzip on;\tgzip_disable \"msie6\";\t# gzip_vary on;\t# gzip_proxied any;\t# gzip_comp_level 6;\t# gzip_buffers 16 8k;\t# gzip_http_version 1.1;\t# gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;  # 응답이 없는 client와의 연결을 끊는 것을 허용함으로써 이를통해 메모리를 비울 수 있다.  reset_timedout_connection on;  # request timed out -- default 60  # 참조 1에 의하면 10  client_body_timeout 60;  # 서버는 이 시간후에 커넥션을 종료함 -- 기본값 75  keepalive_timeout 30;\t##\t# Virtual Host Configs\t##\tinclude /etc/nginx/conf.d/*.conf;\tinclude /etc/nginx/sites-enabled/*;&#125;\n\n\nNginx 의 설정파일은 크게 4가지 지시어블록을 가지고 있다.\nhttp 블록http 블록은 이후에 소개할 server, location의 루트 블록이라고 할 수 있고, 여기서 설정된 값을 하위 블록들은 상속한다. http 블록은 여러개를 사용할 수 있지만 관리상의 이슈로 한번만 사용하는 것을 권장한다.\nhttp, server, location 블록은 계층구조를 가지고 있다. 많은 지시어가 각각의 블록에서 동시에 사용할 수 있는데, http의 내용은 server의 기본값이 되고, server의 지시어는 location의 기본값이 된다. 그리고 하위의 블록에서 선언된 지시어는 상위의 선언을 무시하고 적용된다.\n\n\nserver 블록server 블록은 하나의 웹사이트를 선언하는데 사용된다. 가상 호스팅(Virtual Host)의 개념이다. 예를들어 하나의 서버로 http://opentutorials.org 과 http://egoing.net 을 동시에 운영하고 싶은 경우 사용할 수 있는 방법이다. 가상 호스팅에 대한 자세한 내용은 가상 호스팅 수업을 참고하자.\nlocation 블록location 블록은 server 블록 안에 등장하면서 특정 URL을 처리하는 방법을 정의한다. 이를테면 http://opentutorials.org/course/1 과 http://opentutorials.org/module/1 로 접근하는 요청을 다르게 처리하고 싶을 때 사용한다.\nevents 블록이벤트 블록은 주로 네트워크의 동작방법과 관련된 설정값을 가진다. 이벤트 블록의 지시어들은 이벤트 블록에서만 사용할 수 있고, http, server, location와는 상속관계를 갖지 않는다. 이벤트 모듈 지시어에 대한 설명은 이벤트 모듈 지시어 사전을 참고한다.\n가상 호스트 설정\n/etc/nginx/sites-available 경로에 위치한다.\n\n가상 호스트 설정 파일은 sites-available 에 위치하고 실제로 동작시킬 가상 호스트가 있는 경우 /etc/nginx/sites-enabled 에 symbolic link를 만들어 사용한다.\n\nsites-available에 있다고 해서 설정이 적용되지는 않는다. 이 디렉터리에 있어야 비로소 설정이 적용된다. sites-available에서 적용할 설정파일을 symbolic link 를 만들어 사용한다.\n\n즉 lesstif.com 이라는 가상 호스트가 있을 경우 /etc/nginx/sites-available/lesstif.com 파일에 설정하고 사용할 경우에는 다음 명령어로 symbolic link를 만들어 주면 된다.\n\nsymbolic link 란?\n- 링크를 연결하여 원본 파일을 직접 사용하는 것과 같은 효과를 내는 링크이다. 윈도우의 바로가기와 비슷한 개념\n- 특정 폴더에 링크를 걸어 NAS, library 원본 파일을 사용하기 위해 심볼릭 링크를 사용한다.\n\n\n1ln -s /etc/nginx/sites-available/lesstif.com /etc/nginx/sites-enabled\n\n명령어\n재시작\n\n12nginx -s reload/etc/init.d/nginx start|restart\n\n\nconfig 테스트\n\n12nginx -t/etc/init.d/nginx configtest\n\n\n로그\n\n1234# Nginx의 오류 로그 실시간 확인tail -f /var/log/nginx/error.log# Nginx의 서버 접근 기록 실시간 모니터링tail -f  /var/log/nginx/access.log\n\n지시어문자열\n지시어 값으로 사용되는 문자열은 세가지 형태로 나타나는데, 우선 따옴표를 사용하지 않고 문자열을 나타낼 수 있다.\n\n1root    /home/example.com/www;\n\n\n하지만, 공백 문자(“”), 세미콜론(;), 중괄호({}) 같은 특수 문자를 사용하려면 작은 따옴표나 큰따옴표 안에 지시어 값을 넣어야 한다.\n\n1root    '/home/example.com/my web pages';\n\n에러로그가장 상세한 로그 레벨부터 차례로 debug, info, notice, warn, error, crit가 됩니다. 애플리케이션, HTTP 서버, 가상 호스트, 가상 호스트 디렉토리 각각에 대해 다른 레벨로 에러 로그를 설정할 수 있다.\n로그 출력 방향을 /dev/null로 전환하면 에러 로그를 해제하는 것과 같은 효과를 얻을 수 있습니다. 환경 설정 파일의 루트 부분에 다음의 지시어를 사용합니다.\n1234error_log &#123;file_path&#125; &#123;level&#125;# ex) error_log /var/log/nginx/access.log;# ex) error_log /var/log/nginx/access.log crit;# ex) error_log /dev/null crit; # 에러 로그 해제\n\n참조\nNGINX Tuning For Best Performance\n\nNginx 기본 환경 설정\n\n가상 호스트\n\nsymbolic link\n\n\n","dateCreated":"2019-12-29T07:11:46+09:00","dateModified":"2019-12-29T07:12:48+09:00","datePublished":"2019-12-29T07:11:46+09:00","description":"배포하는데 필요한 것들을 공부해보자","headline":"nginx","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"http://yoursite.com/2019/12/29/nginx/"},"publisher":{"@type":"Organization","name":"Junow","sameAs":["https://github.com/junow","mailto taristmas@gmail.com"]},"url":"http://yoursite.com/2019/12/29/nginx/","keywords":"nginx"}</script>
+    <meta name="description" content="배포하는데 필요한 것들을 공부해보자">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="nginx">
+<meta property="og:url" content="http://yoursite.com/2019/12/29/nginx/index.html">
+<meta property="og:site_name" content="Junow">
+<meta property="og:description" content="배포하는데 필요한 것들을 공부해보자">
+<meta property="og:locale" content="ko_KR">
+<meta property="article:published_time" content="2019-12-28T22:11:46.000Z">
+<meta property="article:modified_time" content="2019-12-28T22:12:48.420Z">
+<meta property="article:author" content="Junow">
+<meta property="article:tag" content="nginx">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+    
+    
+    
+    
+    
+    <!--STYLES-->
+    
+<link rel="stylesheet" href="/assets/css/all.css">
+
+    
+<link rel="stylesheet" href="/assets/css/jquery.fancybox.css">
+
+    
+<link rel="stylesheet" href="/assets/css/thumbs.css">
+
+    
+<link rel="stylesheet" href="/assets/css/tranquilpeak.css">
+
+    <!--STYLES END-->
+    
+
+    
+
+    
+        
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+
+<header id="header" data-behavior="5">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a
+            class="header-title-link"
+            href="/%20"
+            aria-label=""
+        >
+            Junow
+        </a>
+    </div>
+    
+        
+            <a
+                class="header-right-picture "
+                href="#about"
+                aria-label="링크 열기: /#about"
+            >
+        
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+ 
+<nav id="sidebar" data-behavior="5">
+  <div class="sidebar-container">
+     
+    <ul class="sidebar-buttons">
+      
+      <li class="sidebar-button">
+         <a class="sidebar-button-link "  href="/"
+           title="Home" > 
+          <i
+            class="sidebar-button-icon fa fa-home"
+            aria-hidden="true"
+          ></i>
+          <span class="sidebar-button-desc"
+            >Home</span
+          >
+        </a>
+      </li>
+      
+      <li class="sidebar-button">
+         <a class="sidebar-button-link " 
+          href="/all-categories"  title="카테고리" > 
+          <i
+            class="sidebar-button-icon fa fa-bookmark"
+            aria-hidden="true"
+          ></i>
+          <span class="sidebar-button-desc"
+            >카테고리</span
+          >
+        </a>
+      </li>
+      
+      <li class="sidebar-button">
+         <a class="sidebar-button-link " 
+          href="/all-tags"  title="태그" > 
+          <i
+            class="sidebar-button-icon fa fa-tags"
+            aria-hidden="true"
+          ></i>
+          <span class="sidebar-button-desc"
+            >태그</span
+          >
+        </a>
+      </li>
+      
+      <li class="sidebar-button">
+         <a class="sidebar-button-link open-algolia-search" 
+          href="#search"  title="검색" > 
+          <i
+            class="sidebar-button-icon fa fa-search"
+            aria-hidden="true"
+          ></i>
+          <span class="sidebar-button-desc"
+            >검색</span
+          >
+        </a>
+      </li>
+      
+    </ul>
+    
+    <ul class="sidebar-buttons">
+      
+      <li class="sidebar-button">
+        
+        <a
+          class="sidebar-button-link "
+          href="https://github.com/junow"
+          target="_blank"
+          rel="noopener"
+          title="GitHub"
+        >
+          
+          <i
+            class="sidebar-button-icon fab fa-github"
+            aria-hidden="true"
+          ></i>
+          <span class="sidebar-button-desc"
+            >GitHub</span
+          >
+        </a>
+      </li>
+      
+      <li class="sidebar-button">
+         <a class="sidebar-button-link "  href="/mailto%20taristmas@gmail.com" title="Mail" > 
+          <i
+            class="sidebar-button-icon fa fa-envelope"
+            aria-hidden="true"
+          ></i>
+          <span class="sidebar-button-desc"
+            >Mail</span
+          >
+        </a>
+      </li>
+      
+    </ul>
+    
+  </div>
+</nav>
+
+            
+            <div id="main" data-behavior="5"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            nginx
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2019-12-29T07:11:46+09:00">
+	
+		    2019/12/29
+    	
+    </time>
+    
+        <span>카테고리 </span>
+        
+    <a class="category-link" href="/categories/Architecture/">Architecture</a>, <a class="category-link" href="/categories/Architecture/Nginx/">Nginx</a>
+
+
+    
+</div>
+
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <p>배포하는데 필요한 것들을 공부해보자</p>
+<a id="more"></a>
+
+<ul>
+<li>기본 설정파일 경로는 <strong><em>/etc/nginx/nginx.conf</em></strong></li>
+</ul>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 이 설정은 worker process가 root권한으로 실행되게 한다. 파일 시스템의 모든 권한을 얻게되므로 보안상 위험하다.</span></span><br><span class="line"><span class="attribute">user</span> root;</span><br><span class="line"><span class="comment"># 워커 프로세스는 CPU core 수에 따라 설정해야한다. nginx는 그 이상의 이득을 주지는 않는다.</span></span><br><span class="line"><span class="comment"># 기본값은 1이지만 CPU가 2개이상의 코어를 갖는다면 이 값을 증가시키도록 권장한다.</span></span><br><span class="line"><span class="comment"># auto - 자동적으로 계산한다.</span></span><br><span class="line"><span class="attribute">worker_processes</span> auto;</span><br><span class="line"><span class="attribute">pid</span> /run/nginx.pid;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 연결 처리에 영향을주는 지시문이 지정되는 구성 파일 컨텍스트를 제공한다.</span></span><br><span class="line"><span class="section">events</span> &#123;</span><br><span class="line">  <span class="comment"># 워커 하나가 몇명의 유저가 서비스를 할지 결정한다.</span></span><br><span class="line">  <span class="comment"># max clients = worker_connections * worker_processes</span></span><br><span class="line">  <span class="comment"># max clients 는 시스템에서 연결가능한 소켓 개수에 따라 제한한다. (~64k)</span></span><br><span class="line"> 	<span class="attribute">worker_connections</span> <span class="number">1024</span>;</span><br><span class="line">	<span class="comment"># multi_accept on;</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># 테스팅 환경을 위해 각 스레드마다 많은 클라이언트를 서비스하도록 최적화한다.</span></span><br><span class="line">  <span class="comment"># use epoll;</span></span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="section">http</span> &#123;</span><br><span class="line"></span><br><span class="line">	<span class="comment">##</span></span><br><span class="line">	<span class="comment"># Basic Settings</span></span><br><span class="line">	<span class="comment">##</span></span><br><span class="line"></span><br><span class="line">	<span class="attribute">sendfile</span> <span class="literal">on</span>;</span><br><span class="line">	<span class="attribute">tcp_nopush</span> <span class="literal">on</span>;</span><br><span class="line">	<span class="attribute">tcp_nodelay</span> <span class="literal">on</span>;</span><br><span class="line">	<span class="attribute">keepalive_timeout</span> <span class="number">65</span>;</span><br><span class="line">	<span class="attribute">types_hash_max_size</span> <span class="number">2048</span>;</span><br><span class="line">	<span class="comment"># Nginx의 버전을 숨길것인가에 대한 옵션이다. 보안상 주석을 제거하여 설정하는 것이 좋다.</span></span><br><span class="line">	<span class="comment"># server_tokens off;</span></span><br><span class="line"></span><br><span class="line">	<span class="comment"># server_names_hash_bucket_size 64;</span></span><br><span class="line">	<span class="comment"># server_name_in_redirect off;</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># include 는 이름 그대로 특정 파일을 포함시키는 역할을 한다.</span></span><br><span class="line">  <span class="comment"># include 지시어가 있는 위치에 해당 파일의 내용을 삽입한다.</span></span><br><span class="line">	<span class="attribute">include</span> /etc/nginx/mime.types;</span><br><span class="line">	<span class="attribute">default_type</span> application/octet-stream;</span><br><span class="line"></span><br><span class="line">	<span class="comment">##</span></span><br><span class="line">	<span class="comment"># SSL Settings</span></span><br><span class="line">	<span class="comment">##</span></span><br><span class="line"></span><br><span class="line">	<span class="attribute">ssl_protocols</span> TLSv1 TLSv1.<span class="number">1</span> TLSv1.<span class="number">2</span>; <span class="comment"># Dropping SSLv3, ref: POODLE</span></span><br><span class="line">	<span class="attribute">ssl_prefer_server_ciphers</span> <span class="literal">on</span>;</span><br><span class="line"></span><br><span class="line">	<span class="comment">##</span></span><br><span class="line">	<span class="comment"># Logging Settings</span></span><br><span class="line">	<span class="comment">##</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># 참조 1에 따르면 HDD에 대한 I/O 성능을 높이기 위해 off 할 수도 있다.</span></span><br><span class="line">  <span class="comment"># ex) off;</span></span><br><span class="line">  <span class="attribute">access_log</span> /var/log/nginx/access.log;</span><br><span class="line"></span><br><span class="line">  <span class="comment"># 에러 로그 파일을 저장할 위치</span></span><br><span class="line">  <span class="comment"># 참조 1에 따르면 끝에 crit 옵션을 주어서 성능을 높일 수 있다고 한다.</span></span><br><span class="line">  <span class="comment"># ex) error_log /var/log/nginx/error.log crit;</span></span><br><span class="line">	<span class="attribute">error_log</span> /var/log/nginx/error.log;</span><br><span class="line"></span><br><span class="line">	<span class="comment">##</span></span><br><span class="line">	<span class="comment"># Gzip Settings</span></span><br><span class="line">	<span class="comment">##</span></span><br><span class="line"></span><br><span class="line">	<span class="attribute">gzip</span> <span class="literal">on</span>;</span><br><span class="line">	<span class="attribute">gzip_disable</span> <span class="string">"msie6"</span>;</span><br><span class="line"></span><br><span class="line">	<span class="comment"># gzip_vary on;</span></span><br><span class="line">	<span class="comment"># gzip_proxied any;</span></span><br><span class="line">	<span class="comment"># gzip_comp_level 6;</span></span><br><span class="line">	<span class="comment"># gzip_buffers 16 8k;</span></span><br><span class="line">	<span class="comment"># gzip_http_version 1.1;</span></span><br><span class="line">	<span class="comment"># gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># 응답이 없는 client와의 연결을 끊는 것을 허용함으로써 이를통해 메모리를 비울 수 있다.</span></span><br><span class="line">  <span class="attribute">reset_timedout_connection</span> <span class="literal">on</span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment"># request timed out -- default 60</span></span><br><span class="line">  <span class="comment"># 참조 1에 의하면 10</span></span><br><span class="line">  <span class="attribute">client_body_timeout</span> <span class="number">60</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  <span class="comment"># 서버는 이 시간후에 커넥션을 종료함 -- 기본값 75</span></span><br><span class="line">  <span class="attribute">keepalive_timeout</span> <span class="number">30</span>;</span><br><span class="line"></span><br><span class="line">	<span class="comment">##</span></span><br><span class="line">	<span class="comment"># Virtual Host Configs</span></span><br><span class="line">	<span class="comment">##</span></span><br><span class="line"></span><br><span class="line">	<span class="attribute">include</span> /etc/nginx/conf.d/<span class="regexp">*.conf</span>;</span><br><span class="line">	<span class="attribute">include</span> /etc/nginx/sites-enabled/*;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>Nginx 의 설정파일은 크게 4가지 지시어블록을 가지고 있다.</p>
+<h3 id="http-블록"><a href="#http-블록" class="headerlink" title="http 블록"></a>http 블록</h3><p>http 블록은 이후에 소개할 server, location의 루트 블록이라고 할 수 있고, 여기서 설정된 값을 하위 블록들은 상속한다. http 블록은 여러개를 사용할 수 있지만 관리상의 이슈로 한번만 사용하는 것을 권장한다.</p>
+<p>http, server, location 블록은 계층구조를 가지고 있다. 많은 지시어가 각각의 블록에서 동시에 사용할 수 있는데, http의 내용은 server의 기본값이 되고, server의 지시어는 location의 기본값이 된다. 그리고 하위의 블록에서 선언된 지시어는 상위의 선언을 무시하고 적용된다.</p>
+</li>
+</ul>
+<h3 id="server-블록"><a href="#server-블록" class="headerlink" title="server 블록"></a>server 블록</h3><p>server 블록은 하나의 웹사이트를 선언하는데 사용된다. 가상 호스팅(Virtual Host)의 개념이다. 예를들어 하나의 서버로 <a href="http://opentutorials.org" target="_blank" rel="noopener">http://opentutorials.org</a> 과 <a href="http://egoing.net" target="_blank" rel="noopener">http://egoing.net</a> 을 동시에 운영하고 싶은 경우 사용할 수 있는 방법이다. 가상 호스팅에 대한 자세한 내용은 가상 호스팅 수업을 참고하자.</p>
+<h3 id="location-블록"><a href="#location-블록" class="headerlink" title="location 블록"></a>location 블록</h3><p>location 블록은 server 블록 안에 등장하면서 특정 URL을 처리하는 방법을 정의한다. 이를테면 <a href="http://opentutorials.org/course/1" target="_blank" rel="noopener">http://opentutorials.org/course/1</a> 과 <a href="http://opentutorials.org/module/1" target="_blank" rel="noopener">http://opentutorials.org/module/1</a> 로 접근하는 요청을 다르게 처리하고 싶을 때 사용한다.</p>
+<h3 id="events-블록"><a href="#events-블록" class="headerlink" title="events 블록"></a>events 블록</h3><p>이벤트 블록은 주로 네트워크의 동작방법과 관련된 설정값을 가진다. 이벤트 블록의 지시어들은 이벤트 블록에서만 사용할 수 있고, http, server, location와는 상속관계를 갖지 않는다. 이벤트 모듈 지시어에 대한 설명은 <a href="http://opentutorials.org/module/384/4534" target="_blank" rel="noopener">이벤트 모듈 지시어 사전</a>을 참고한다.</p>
+<h1 id="가상-호스트-설정"><a href="#가상-호스트-설정" class="headerlink" title="가상 호스트 설정"></a>가상 호스트 설정</h1><ul>
+<li><p><strong><em>/etc/nginx/sites-available</em></strong> 경로에 위치한다.</p>
+</li>
+<li><p>가상 호스트 설정 파일은 <strong><em>sites-available</em></strong> 에 위치하고 실제로 동작시킬 가상 호스트가 있는 경우 <strong><em>/etc/nginx/sites-enabled</em></strong> 에 symbolic link를 만들어 사용한다.</p>
+</li>
+<li><p><strong>sites-available</strong>에 있다고 해서 설정이 적용되지는 않는다. 이 디렉터리에 있어야 비로소 설정이 적용된다. <strong>sites-available</strong>에서 적용할 설정파일을 <strong>symbolic link</strong> 를 만들어 사용한다.</p>
+</li>
+<li><p>즉 <strong>lesstif.com</strong> 이라는 가상 호스트가 있을 경우 <strong><em>/etc/nginx/sites-available/lesstif.com</em></strong> 파일에 설정하고 사용할 경우에는 다음 명령어로 symbolic link를 만들어 주면 된다.</p>
+</li>
+<li><p><strong>symbolic link 란?</strong></p>
+<p>- 링크를 연결하여 원본 파일을 직접 사용하는 것과 같은 효과를 내는 링크이다. 윈도우의 바로가기와 비슷한 개념</p>
+<p>- 특정 폴더에 링크를 걸어 NAS, library 원본 파일을 사용하기 위해 심볼릭 링크를 사용한다.</p>
+</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ln -s /etc/nginx/sites-available/lesstif.com /etc/nginx/sites-enabled</span><br></pre></td></tr></table></figure>
+
+<h1 id="명령어"><a href="#명령어" class="headerlink" title="명령어"></a>명령어</h1><ul>
+<li>재시작</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">nginx -s reload</span><br><span class="line">/etc/init.d/nginx start|restart</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>config 테스트</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">nginx -t</span><br><span class="line">/etc/init.d/nginx configtest</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>로그</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> Nginx의 오류 로그 실시간 확인</span></span><br><span class="line">tail -f /var/log/nginx/error.log</span><br><span class="line"><span class="meta">#</span><span class="bash"> Nginx의 서버 접근 기록 실시간 모니터링</span></span><br><span class="line">tail -f  /var/log/nginx/access.log</span><br></pre></td></tr></table></figure>
+
+<h1 id="지시어"><a href="#지시어" class="headerlink" title="지시어"></a>지시어</h1><h3 id="문자열"><a href="#문자열" class="headerlink" title="문자열"></a>문자열</h3><ul>
+<li>지시어 값으로 사용되는 문자열은 세가지 형태로 나타나는데, 우선 따옴표를 사용하지 않고 문자열을 나타낼 수 있다.</li>
+</ul>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">root</span>    /home/example.com/www;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>하지만, 공백 문자(“”), 세미콜론(;), 중괄호({}) 같은 특수 문자를 사용하려면 작은 따옴표나 큰따옴표 안에 지시어 값을 넣어야 한다.</li>
+</ul>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">root</span>    <span class="string">'/home/example.com/my web pages'</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="에러로그"><a href="#에러로그" class="headerlink" title="에러로그"></a>에러로그</h3><p>가장 상세한 로그 레벨부터 차례로 debug, info, notice, warn, error, crit가 됩니다. 애플리케이션, HTTP 서버, 가상 호스트, 가상 호스트 디렉토리 각각에 대해 다른 레벨로 에러 로그를 설정할 수 있다.</p>
+<p>로그 출력 방향을 /dev/null로 전환하면 에러 로그를 해제하는 것과 같은 효과를 얻을 수 있습니다. 환경 설정 파일의 루트 부분에 다음의 지시어를 사용합니다.</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">error_log &#123;file_path&#125; &#123;level&#125;</span><br><span class="line"><span class="comment"># ex) error_log /var/log/nginx/access.log;</span></span><br><span class="line"><span class="comment"># ex) error_log /var/log/nginx/access.log crit;</span></span><br><span class="line"><span class="comment"># ex) error_log /dev/null crit; # 에러 로그 해제</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="참조"><a href="#참조" class="headerlink" title="참조"></a>참조</h1><ol>
+<li><p><a href="https://gist.github.com/denji/8359866" target="_blank" rel="noopener">NGINX Tuning For Best Performance</a></p>
+</li>
+<li><p><a href="https://12bme.tistory.com/366" target="_blank" rel="noopener">Nginx 기본 환경 설정</a></p>
+</li>
+<li><p><a href="https://www.joinc.co.kr/w/man/12/Nginx/virtualhost" target="_blank" rel="noopener">가상 호스트</a></p>
+</li>
+<li><p><a href="https://qjadud22.tistory.com/22" target="_blank" rel="noopener">symbolic link</a></p>
+</li>
+</ol>
+
+            
+
+
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">태그</span><br/>
+                
+    <a class="tag tag--primary tag--small t-link" href="/tags/nginx/" rel="tag">nginx</a>
+
+            </div>
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2019/12/29/React-Key-In-List/"
+                    data-tooltip="React-Key-In-List"
+                    aria-label="이전: React-Key-In-List"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2019/12/29/TypeScript-4/"
+                    data-tooltip="TypeScript-4"
+                    aria-label="다음: TypeScript-4"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://yoursite.com/2019/12/29/nginx/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=http://yoursite.com/2019/12/29/nginx/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=http://yoursite.com/2019/12/29/nginx/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+                <li class="post-action">
+                    <a
+                        class="post-action-btn btn btn--default"
+                        href="#disqus_thread"
+                        aria-label="댓글을 남겨주세요"
+                    >
+                        <i class="fa fa-comment"></i>
+                    </a>
+                </li>
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        
+            
+                <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript" target="_blank" rel="noopener">comments powered by Disqus.</a></noscript>
+</div>
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2019 Junow. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="5">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2019/12/29/React-Key-In-List/"
+                    data-tooltip="React-Key-In-List"
+                    aria-label="이전: React-Key-In-List"
+                >
+                    
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">이전</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2019/12/29/TypeScript-4/"
+                    data-tooltip="TypeScript-4"
+                    aria-label="다음: TypeScript-4"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">다음</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="이 포스트 공유하기"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://yoursite.com/2019/12/29/nginx/"
+                    title="Facebook에 공유하기"
+                    aria-label="Facebook에 공유하기"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=http://yoursite.com/2019/12/29/nginx/"
+                    title="Twitter에 공유하기"
+                    aria-label="Twitter에 공유하기"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=http://yoursite.com/2019/12/29/nginx/"
+                    title="Google+에 공유하기"
+                    aria-label="Google+에 공유하기"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+                <li class="post-action">
+                    <a
+                        class="post-action-btn btn btn--default"
+                        href="#disqus_thread"
+                        aria-label="댓글을 남겨주세요"
+                    >
+                        <i class="fa fa-comment"></i>
+                    </a>
+                </li>
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="맨 위로">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="5">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=http://yoursite.com/2019/12/29/nginx/"
+                        aria-label="Facebook에 공유하기"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>Facebook에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=http://yoursite.com/2019/12/29/nginx/"
+                        aria-label="Twitter에 공유하기"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>Twitter에 공유하기</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=http://yoursite.com/2019/12/29/nginx/"
+                        aria-label="Google+에 공유하기"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>Google+에 공유하기</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
+            
+        </div>
+        
+
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <h4 id="about-card-name">Junow</h4>
+        
+            <div id="about-card-bio"><p>author.bio</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>author.job</p>
+
+            </div>
+        
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/assets/images/cover-v1.2.0.jpg');"></div>
+        <!--SCRIPTS-->
+
+<script src="/assets/js/jquery.js"></script>
+
+
+<script src="/assets/js/jquery.fancybox.js"></script>
+
+
+<script src="/assets/js/thumbs.js"></script>
+
+
+<script src="/assets/js/tranquilpeak.js"></script>
+
+<!--SCRIPTS END-->
+
+
+    
+        <script>
+          var disqus_config = function() {
+            this.page.url = 'http://yoursite.com/2019/12/29/nginx/';
+              
+            this.page.identifier = '2019/12/29/nginx/';
+              
+          };
+          (function() {
+            var d = document, s = d.createElement('script');
+            var disqus_shortname = 'junow';
+            s.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+          })();
+        </script>
+    
+
+
+
+
+    </body>
+</html>
