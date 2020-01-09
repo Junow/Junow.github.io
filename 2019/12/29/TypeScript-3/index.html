@@ -11,7 +11,7 @@
     
     
     
-    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Junow","sameAs":["https://github.com/junow","mailto taristmas@gmail.com"]},"articleBody":"type script에 대해 알아보자 (3) - type\n\n\n\n\n타입스크립트는 사용자가 자바스크립에서 기대하는것과 같은 타입들(숫자, 문자열, 구조, 부울) 을 지원한다.​ 타입 선언을 통해 개발자가 코드를 예측가능할 수 있도록 도와주고 문법 에러나 타입과 일치하지 않는 값의 할당 등 기본적인 오류를 런타임 이전에 찾아낼 수 있다.\nBoolean1let isDone: boolean = false;\n\nNumber1234let decimal: number = 6;let hex: number = 0xf00d;let binary: number = 0b1010;let octal: number = 0o744;\n\nString\ntemplate string 을 이용해서도 물론 가능\n\n12let age: number = 25;let introduce: string = `i'm junow and i'm $&#123;age&#125;`;\n\nArray\n두가지 방식이 있다.\n두번째는 제네릭 배열 타입 사용₩\n\n123let arr: number[] = [1, 2, 3];arr.push(4);arr.push(5);\n\n1let arr: Array&lt;number&gt; = [1, 2, 3];\n\nTuple\n튜플은 고정된 개수의 요소 타입을 알고 있지만 반드시 같을 필요는 없는 배열을 나타낼 때 사용\n\n12let x: [string, number];x = [\"hello\", 123];\n\nEnum123456789enum Color &#123;  Red = 1,  Green = 2,  Blue = 4&#125;let red: Color = Color.Red; // 1let blue: string = Color[4]; // Blue\n\nAny\n해당값의 타입을 모를경우 사용가능\n너무 남발하면 코드 분석에 타입체의 도움은 받을 수 없으므로 주의\n\n123456let notSure: any = 4;notSure.ifItExists(); // 런타임에 존재할수도 있음notSure.toFixed(); // 런타임에 존재할수도 있음 (any 라서 컴파일러가 체크하지는 않음 )let prettySure: Object = 4;// prettySure.toFixed(); // 여기서는 컴파일러가 체크해서 오류뱉음 any가 아니라\n\nVoid\nany 와 비슷하지만 어떤 타입의 부재도 전혀 없다.\n일반적으로 반환 값이 없는 함수의 반환타입으로 쓰일 수 있다.\n하지만 void 타입의 변수는 undefined 만 할당할 수 있으므로 유용하지 않다. (null 도 가능하다고 하나 안됨)\n\n12345function warnUser(): void &#123;  console.error(\"This is my warning message\");&#125;let num: void = undefined; // 가능let str: void = \"123\"; // 에러\n\n참조\nhttps://poiemaweb.com/typescript-typing\n\nhttps://typescript-kr.github.io/pages/Basic%20Types.html\n\nhttps://engineering.huiseoul.com/타입스크립트-기본-타입-a83401d414d8\n\n\n","dateCreated":"2019-12-29T07:06:26+09:00","dateModified":"2019-12-29T07:08:25+09:00","datePublished":"2019-12-29T07:06:26+09:00","description":"type script에 대해 알아보자 (3) - type\n","headline":"TypeScript-3","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"http://yoursite.com/2019/12/29/TypeScript-3/"},"publisher":{"@type":"Organization","name":"Junow","sameAs":["https://github.com/junow","mailto taristmas@gmail.com"]},"url":"http://yoursite.com/2019/12/29/TypeScript-3/","keywords":"JavaScript, TypeScript"}</script>
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Junow","sameAs":["https://github.com/junow","mailto:taristmas@gmail.com"]},"articleBody":"type script에 대해 알아보자 (3) - type\n\n\n\n\n타입스크립트는 사용자가 자바스크립에서 기대하는것과 같은 타입들(숫자, 문자열, 구조, 부울) 을 지원한다.​ 타입 선언을 통해 개발자가 코드를 예측가능할 수 있도록 도와주고 문법 에러나 타입과 일치하지 않는 값의 할당 등 기본적인 오류를 런타임 이전에 찾아낼 수 있다.\nBoolean1let isDone: boolean = false;\n\nNumber1234let decimal: number = 6;let hex: number = 0xf00d;let binary: number = 0b1010;let octal: number = 0o744;\n\nString\ntemplate string 을 이용해서도 물론 가능\n\n12let age: number = 25;let introduce: string = `i'm junow and i'm $&#123;age&#125;`;\n\nArray\n두가지 방식이 있다.\n두번째는 제네릭 배열 타입 사용₩\n\n123let arr: number[] = [1, 2, 3];arr.push(4);arr.push(5);\n\n1let arr: Array&lt;number&gt; = [1, 2, 3];\n\nTuple\n튜플은 고정된 개수의 요소 타입을 알고 있지만 반드시 같을 필요는 없는 배열을 나타낼 때 사용\n\n12let x: [string, number];x = [\"hello\", 123];\n\nEnum123456789enum Color &#123;  Red = 1,  Green = 2,  Blue = 4&#125;let red: Color = Color.Red; // 1let blue: string = Color[4]; // Blue\n\nAny\n해당값의 타입을 모를경우 사용가능\n너무 남발하면 코드 분석에 타입체의 도움은 받을 수 없으므로 주의\n\n123456let notSure: any = 4;notSure.ifItExists(); // 런타임에 존재할수도 있음notSure.toFixed(); // 런타임에 존재할수도 있음 (any 라서 컴파일러가 체크하지는 않음 )let prettySure: Object = 4;// prettySure.toFixed(); // 여기서는 컴파일러가 체크해서 오류뱉음 any가 아니라\n\nVoid\nany 와 비슷하지만 어떤 타입의 부재도 전혀 없다.\n일반적으로 반환 값이 없는 함수의 반환타입으로 쓰일 수 있다.\n하지만 void 타입의 변수는 undefined 만 할당할 수 있으므로 유용하지 않다. (null 도 가능하다고 하나 안됨)\n\n12345function warnUser(): void &#123;  console.error(\"This is my warning message\");&#125;let num: void = undefined; // 가능let str: void = \"123\"; // 에러\n\n참조\nhttps://poiemaweb.com/typescript-typing\n\nhttps://typescript-kr.github.io/pages/Basic%20Types.html\n\nhttps://engineering.huiseoul.com/타입스크립트-기본-타입-a83401d414d8\n\n\n","dateCreated":"2019-12-29T07:06:26+09:00","dateModified":"2019-12-29T07:08:25+09:00","datePublished":"2019-12-29T07:06:26+09:00","description":"type script에 대해 알아보자 (3) - type\n","headline":"TypeScript-3","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"http://yoursite.com/2019/12/29/TypeScript-3/"},"publisher":{"@type":"Organization","name":"Junow","sameAs":["https://github.com/junow","mailto:taristmas@gmail.com"]},"url":"http://yoursite.com/2019/12/29/TypeScript-3/","keywords":"JavaScript, TypeScript"}</script>
     <meta name="description" content="type script에 대해 알아보자 (3) - type">
 <meta property="og:type" content="blog">
 <meta property="og:title" content="TypeScript-3">
@@ -65,7 +65,7 @@
 
     
 
-<header id="header" data-behavior="5">
+<header id="header" data-behavior="4">
     <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
     <div class="header-title">
         <a
@@ -91,7 +91,7 @@
 
             <!-- Define author's picture -->
  
-<nav id="sidebar" data-behavior="5">
+<nav id="sidebar" data-behavior="4">
   <div class="sidebar-container">
      
     <ul class="sidebar-buttons">
@@ -173,7 +173,15 @@
       </li>
       
       <li class="sidebar-button">
-         <a class="sidebar-button-link "  href="/mailto%20taristmas@gmail.com" title="Mail" > 
+        
+        <a
+          class="sidebar-button-link "
+          href="mailto:taristmas@gmail.com"
+          target="_blank"
+          rel="noopener"
+          title="Mail"
+        >
+          
           <i
             class="sidebar-button-icon fa fa-envelope"
             aria-hidden="true"
@@ -190,7 +198,7 @@
 </nav>
 
             
-            <div id="main" data-behavior="5"
+            <div id="main" data-behavior="4"
                  class="
                         hasCoverMetaIn
                         ">
@@ -415,13 +423,13 @@
 
                 <footer id="footer" class="main-content-wrap">
     <span class="copyrights">
-        Copyrights &copy; 2019 Junow. All Rights Reserved.
+        Copyrights &copy; 2020 Junow. All Rights Reserved.
     </span>
 </footer>
 
             </div>
             
-                <div id="bottom-bar" class="post-bottom-bar" data-behavior="5">
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="4">
                     <div class="post-actions-wrap">
     <nav>
         <ul class="post-actions post-action-nav">
@@ -531,7 +539,7 @@
 
                 </div>
                 
-    <div id="share-options-bar" class="share-options-bar" data-behavior="5">
+    <div id="share-options-bar" class="share-options-bar" data-behavior="4">
         <i id="btn-close-shareoptions" class="fa fa-times"></i>
         <ul class="share-options">
             
@@ -608,7 +616,7 @@
 
         
         
-<div id="cover" style="background-image:url('/assets/images/cover-v1.2.0.jpg');"></div>
+<div id="cover" style="background-image:url('/assets/images/coke.jpeg');"></div>
         <!--SCRIPTS-->
 
 <script src="/assets/js/jquery.js"></script>

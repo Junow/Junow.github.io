@@ -11,7 +11,7 @@
     
     
     
-    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Junow","sameAs":["https://github.com/junow","mailto taristmas@gmail.com"]},"articleBody":"type script에 대해 알아보자 (2) - 개요\n\n\n\n\nTS 의 특징\ntypescript는 결국 javascript + type인 것이다.\njavascript는 자료형에 대한 지정이 없다. let, const 등을 이용해서 선언만 할뿐.\njavascript 코드를 실행하기 전에 tsc를 이용한 트랜스파일링 과정을 통해 안정성을 확보할 수 있다.\n타입을 미리 알수 있기 때문에 다음과 같은 예외처리가 필요없어진다.\n\n123if(typeof num !== number)&#123;  ...&#125;\n\n인터페이스 (Interfaces)이전 글 에서 간단하게 작성했던 코드에 인터페이스를 지정해보자\n인터페이스는 객체가 가져야하는 형태를 지정해주는 역할이다.\n여기서는 Person 객체는 string 타입의 firstName 과 lastName 을 가져야 한다고 명시하고 있다.\n123456789101112interface Person &#123;  firstName: string;  lastName: string;&#125;function greeter(person: Person) &#123;  return \"Hello, \" + person.firstName + \" \" + person.lastName;&#125;let user = &#123; firstName: \"Junow\", lastName: \"Lee\" &#125;;console.log(greeter(user));\n\n빌드하고 실행해보자\n1234567891011$ npm run build-ts&gt; typescripttest@1.0.0 build-ts ... /typescripttest&gt; tsc$ npm run start&gt; typescripttest@1.0.0 start /Users/tamama/Documents/typescripttest&gt; node bundle/index.jsHello, Junow Lee\n\n클래스 (Classes)javascript에서 클래를 사용할때도 typescript를 이용할 수 있다.\n클래스의 생성자에서 받는 인자들의 타입을 모두 string으로 지정한다.\n이렇게 하면 firstName, middleInitial, lastName 을 이어붙여 만든 Student 클래스의 fullName은 항상 string 타입이라는 안정성을 얻을 수 있다.\n12345678910111213141516171819202122232425262728class Student &#123;  fullName: string;  constructor(    public firstName: string,    public middleInitial: string,    public lastName: string  ) &#123;    this.fullName = firstName + \" \" + middleInitial + \" \" + lastName;  &#125;&#125;interface Person &#123;  firstName: string;  lastName: string;&#125;function greeter(person: Person) &#123;  return \"Hello, \" + person.firstName + \" \" + person.lastName;&#125;function greeterFullName(student: Student) &#123;  return \"Hello, \" + student.fullName;&#125;let user = new Student(\"Junow\", \"J.\", \"Lee\");console.log(greeter(user));console.log(user.fullName);\n\n어김없이 빌드후 실행\n123456789101112$ npm run build-ts&gt; typescripttest@1.0.0 build-ts ... /typescripttest&gt; tsc$ npm run start&gt; typescripttest@1.0.0 start ... /typescripttest&gt; node bundle/index.jsHello, Junow LeeJunow J. Lee\n\n컴파일 할 때 옵션을 줄 수 있는데 --watch 옵션을 줘서 ts 파일이 바뀔때마다 빌드를 할 수 있다.\n12345$ tsc --watch[17:42:20] Starting compilation in watch mode...[17:42:22] Found 0 errors. Watching for file changes.\n\n여기서 ts 파일을 수정하면 변화를 감지하고 다시 컴파일 한다. (매우빠름)\n123[17:43:00] File change detected. Starting incremental compilation...[17:43:00] Found 0 errors. Watching for file changes.\n\n참조\n타입스크립트 한글 문서\n\npoiemaweb\n\n\n","dateCreated":"2019-12-29T06:54:04+09:00","dateModified":"2019-12-29T07:05:00+09:00","datePublished":"2019-12-29T06:54:04+09:00","description":"type script에 대해 알아보자 (2) - 개요\n","headline":"TypeScript-2","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"http://yoursite.com/2019/12/29/TypeScript-2/"},"publisher":{"@type":"Organization","name":"Junow","sameAs":["https://github.com/junow","mailto taristmas@gmail.com"]},"url":"http://yoursite.com/2019/12/29/TypeScript-2/","keywords":"JavaScript, TypeScript"}</script>
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Junow","sameAs":["https://github.com/junow","mailto:taristmas@gmail.com"]},"articleBody":"type script에 대해 알아보자 (2) - 개요\n\n\n\n\nTS 의 특징\ntypescript는 결국 javascript + type인 것이다.\njavascript는 자료형에 대한 지정이 없다. let, const 등을 이용해서 선언만 할뿐.\njavascript 코드를 실행하기 전에 tsc를 이용한 트랜스파일링 과정을 통해 안정성을 확보할 수 있다.\n타입을 미리 알수 있기 때문에 다음과 같은 예외처리가 필요없어진다.\n\n123if(typeof num !== number)&#123;  ...&#125;\n\n인터페이스 (Interfaces)이전 글 에서 간단하게 작성했던 코드에 인터페이스를 지정해보자\n인터페이스는 객체가 가져야하는 형태를 지정해주는 역할이다.\n여기서는 Person 객체는 string 타입의 firstName 과 lastName 을 가져야 한다고 명시하고 있다.\n123456789101112interface Person &#123;  firstName: string;  lastName: string;&#125;function greeter(person: Person) &#123;  return \"Hello, \" + person.firstName + \" \" + person.lastName;&#125;let user = &#123; firstName: \"Junow\", lastName: \"Lee\" &#125;;console.log(greeter(user));\n\n빌드하고 실행해보자\n1234567891011$ npm run build-ts&gt; typescripttest@1.0.0 build-ts ... /typescripttest&gt; tsc$ npm run start&gt; typescripttest@1.0.0 start /Users/tamama/Documents/typescripttest&gt; node bundle/index.jsHello, Junow Lee\n\n클래스 (Classes)javascript에서 클래를 사용할때도 typescript를 이용할 수 있다.\n클래스의 생성자에서 받는 인자들의 타입을 모두 string으로 지정한다.\n이렇게 하면 firstName, middleInitial, lastName 을 이어붙여 만든 Student 클래스의 fullName은 항상 string 타입이라는 안정성을 얻을 수 있다.\n12345678910111213141516171819202122232425262728class Student &#123;  fullName: string;  constructor(    public firstName: string,    public middleInitial: string,    public lastName: string  ) &#123;    this.fullName = firstName + \" \" + middleInitial + \" \" + lastName;  &#125;&#125;interface Person &#123;  firstName: string;  lastName: string;&#125;function greeter(person: Person) &#123;  return \"Hello, \" + person.firstName + \" \" + person.lastName;&#125;function greeterFullName(student: Student) &#123;  return \"Hello, \" + student.fullName;&#125;let user = new Student(\"Junow\", \"J.\", \"Lee\");console.log(greeter(user));console.log(user.fullName);\n\n어김없이 빌드후 실행\n123456789101112$ npm run build-ts&gt; typescripttest@1.0.0 build-ts ... /typescripttest&gt; tsc$ npm run start&gt; typescripttest@1.0.0 start ... /typescripttest&gt; node bundle/index.jsHello, Junow LeeJunow J. Lee\n\n컴파일 할 때 옵션을 줄 수 있는데 --watch 옵션을 줘서 ts 파일이 바뀔때마다 빌드를 할 수 있다.\n12345$ tsc --watch[17:42:20] Starting compilation in watch mode...[17:42:22] Found 0 errors. Watching for file changes.\n\n여기서 ts 파일을 수정하면 변화를 감지하고 다시 컴파일 한다. (매우빠름)\n123[17:43:00] File change detected. Starting incremental compilation...[17:43:00] Found 0 errors. Watching for file changes.\n\n참조\n타입스크립트 한글 문서\n\npoiemaweb\n\n\n","dateCreated":"2019-12-29T06:54:04+09:00","dateModified":"2019-12-29T07:05:00+09:00","datePublished":"2019-12-29T06:54:04+09:00","description":"type script에 대해 알아보자 (2) - 개요\n","headline":"TypeScript-2","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"http://yoursite.com/2019/12/29/TypeScript-2/"},"publisher":{"@type":"Organization","name":"Junow","sameAs":["https://github.com/junow","mailto:taristmas@gmail.com"]},"url":"http://yoursite.com/2019/12/29/TypeScript-2/","keywords":"JavaScript, TypeScript"}</script>
     <meta name="description" content="type script에 대해 알아보자 (2) - 개요">
 <meta property="og:type" content="blog">
 <meta property="og:title" content="TypeScript-2">
@@ -65,7 +65,7 @@
 
     
 
-<header id="header" data-behavior="5">
+<header id="header" data-behavior="4">
     <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
     <div class="header-title">
         <a
@@ -91,7 +91,7 @@
 
             <!-- Define author's picture -->
  
-<nav id="sidebar" data-behavior="5">
+<nav id="sidebar" data-behavior="4">
   <div class="sidebar-container">
      
     <ul class="sidebar-buttons">
@@ -173,7 +173,15 @@
       </li>
       
       <li class="sidebar-button">
-         <a class="sidebar-button-link "  href="/mailto%20taristmas@gmail.com" title="Mail" > 
+        
+        <a
+          class="sidebar-button-link "
+          href="mailto:taristmas@gmail.com"
+          target="_blank"
+          rel="noopener"
+          title="Mail"
+        >
+          
           <i
             class="sidebar-button-icon fa fa-envelope"
             aria-hidden="true"
@@ -190,7 +198,7 @@
 </nav>
 
             
-            <div id="main" data-behavior="5"
+            <div id="main" data-behavior="4"
                  class="
                         hasCoverMetaIn
                         ">
@@ -405,13 +413,13 @@
 
                 <footer id="footer" class="main-content-wrap">
     <span class="copyrights">
-        Copyrights &copy; 2019 Junow. All Rights Reserved.
+        Copyrights &copy; 2020 Junow. All Rights Reserved.
     </span>
 </footer>
 
             </div>
             
-                <div id="bottom-bar" class="post-bottom-bar" data-behavior="5">
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="4">
                     <div class="post-actions-wrap">
     <nav>
         <ul class="post-actions post-action-nav">
@@ -521,7 +529,7 @@
 
                 </div>
                 
-    <div id="share-options-bar" class="share-options-bar" data-behavior="5">
+    <div id="share-options-bar" class="share-options-bar" data-behavior="4">
         <i id="btn-close-shareoptions" class="fa fa-times"></i>
         <ul class="share-options">
             
@@ -598,7 +606,7 @@
 
         
         
-<div id="cover" style="background-image:url('/assets/images/cover-v1.2.0.jpg');"></div>
+<div id="cover" style="background-image:url('/assets/images/coke.jpeg');"></div>
         <!--SCRIPTS-->
 
 <script src="/assets/js/jquery.js"></script>

@@ -11,7 +11,7 @@
     
     
     
-    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Junow","sameAs":["https://github.com/junow","mailto taristmas@gmail.com"]},"articleBody":"type script에 대해 알아보자 (4) - interface\n\n\n\n\nInterface\n일반적으로 타입체크를 위해 사용되며 변수, 함수, 클래스에 사용할 수 있다.\nES6 에서는 인터페이스를 지원하지 않지만 TypeScript 에서는 지원한다.\n여타 다른 정적타입 언어에서 많이 쓰이는 인터페이스와 유사하게 사용된다.\n어떠한 객체가 가지는 프로퍼티, 메소드를 선언하는 것이다.\n\n사용법지금까지 사용했던 것처럼 함수가 전달받는 인자의 타입을 정의해줄 수 있었다.\nlabelledObj는 string 타입의 label 이라는 프로퍼티를 가져야 한다고 정의하고 있다.\n123456function printLabel(labelledObj: &#123; label: string &#125;) &#123;  console.log(labelledObj.label);&#125;let myObj = &#123; size: 10, label: \"Size 10 Object\" &#125;;printLabel(myObj);\n\n위에 코드를 interface 를 사용하도록 다시 작성해보자\n12345678910interface LabelledValue &#123;  label: string;&#125;function printLabel(labelledObj: LabelledValue) &#123;  console.log(labelledObj.label);&#125;let myObj = &#123; size: 10, label: \"Size 10 Object\" &#125;;printLabel(myObj);\n\nOptional Properties인터페이스에서 정의한 모든 프로퍼티가 항상 필요하지 않을수도 있는데 이때는 ? 키워드를 이용하면 된다.\nSqueareConfig 인퍼테이스는 color, width 프로퍼티가 있어도되고 없어도 된다고 명시하고 있다.\n이를 구현하는 createSquare 함수에서는 각 프로퍼티가 있을때, 없을때를 구분하여 구현해주면 된다.\n1234567891011121314151617interface SquareConfig &#123;  color?: string;  width?: number;&#125;function createSquare(config: SquareConfig): &#123; color: string; area: number &#125; &#123;  let newSquare = &#123; color: \"white\", area: 100 &#125;;  if (config.color) &#123;    newSquare.color = config.color;  &#125;  if (config.width) &#123;    newSquare.area = config.width * config.width;  &#125;  return newSquare;&#125;let mySquare = createSquare(&#123; color: \"black\" &#125;);\n\nReadonly Properties인터페이스를 정의할 때 readonly 키워드를 이용해 수정불가능 하도록 강제할 수도 있다.\n변수를 const로 정의한 것과 같은 효과를 볼 수 있다.\n불변한 값을 만들고 싶을 때 변수는 const 를 사용하고 프로퍼티는 readonly 를 사용하는 정도의 차이가 있다.\n1234567interface Point &#123;  readonly x: number;  readonly y: number;&#125;let p1: Point = &#123; x: 10, y: 20 &#125;;p1.x = 5; // 오류!\n\n함수함수에 인터페이스를 적용할 수 있다.\n인터페이스에서 함수가 가져야하는 인수의 타입, 반환값의 타입을 지정한다.\n123456interface func &#123;  (baseValue: number, increment: number): number;&#125;let myAdd: func = function(x: number, y: number): number &#123;  return x + y;&#125;;\n\n참조\nhttps://typescript-kr.github.io/pages/Interfaces.html\nhttps://hyunseob.github.io/2016/10/17/typescript-interface/\n\n","dateCreated":"2019-12-29T07:09:07+09:00","dateModified":"2019-12-29T07:09:42+09:00","datePublished":"2019-12-29T07:09:07+09:00","description":"type script에 대해 알아보자 (4) - interface\n","headline":"TypeScript-4","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"http://yoursite.com/2019/12/29/TypeScript-4/"},"publisher":{"@type":"Organization","name":"Junow","sameAs":["https://github.com/junow","mailto taristmas@gmail.com"]},"url":"http://yoursite.com/2019/12/29/TypeScript-4/","keywords":"JavaScript, TypeScript"}</script>
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Junow","sameAs":["https://github.com/junow","mailto:taristmas@gmail.com"]},"articleBody":"type script에 대해 알아보자 (4) - interface\n\n\n\n\nInterface\n일반적으로 타입체크를 위해 사용되며 변수, 함수, 클래스에 사용할 수 있다.\nES6 에서는 인터페이스를 지원하지 않지만 TypeScript 에서는 지원한다.\n여타 다른 정적타입 언어에서 많이 쓰이는 인터페이스와 유사하게 사용된다.\n어떠한 객체가 가지는 프로퍼티, 메소드를 선언하는 것이다.\n\n사용법지금까지 사용했던 것처럼 함수가 전달받는 인자의 타입을 정의해줄 수 있었다.\nlabelledObj는 string 타입의 label 이라는 프로퍼티를 가져야 한다고 정의하고 있다.\n123456function printLabel(labelledObj: &#123; label: string &#125;) &#123;  console.log(labelledObj.label);&#125;let myObj = &#123; size: 10, label: \"Size 10 Object\" &#125;;printLabel(myObj);\n\n위에 코드를 interface 를 사용하도록 다시 작성해보자\n12345678910interface LabelledValue &#123;  label: string;&#125;function printLabel(labelledObj: LabelledValue) &#123;  console.log(labelledObj.label);&#125;let myObj = &#123; size: 10, label: \"Size 10 Object\" &#125;;printLabel(myObj);\n\nOptional Properties인터페이스에서 정의한 모든 프로퍼티가 항상 필요하지 않을수도 있는데 이때는 ? 키워드를 이용하면 된다.\nSqueareConfig 인퍼테이스는 color, width 프로퍼티가 있어도되고 없어도 된다고 명시하고 있다.\n이를 구현하는 createSquare 함수에서는 각 프로퍼티가 있을때, 없을때를 구분하여 구현해주면 된다.\n1234567891011121314151617interface SquareConfig &#123;  color?: string;  width?: number;&#125;function createSquare(config: SquareConfig): &#123; color: string; area: number &#125; &#123;  let newSquare = &#123; color: \"white\", area: 100 &#125;;  if (config.color) &#123;    newSquare.color = config.color;  &#125;  if (config.width) &#123;    newSquare.area = config.width * config.width;  &#125;  return newSquare;&#125;let mySquare = createSquare(&#123; color: \"black\" &#125;);\n\nReadonly Properties인터페이스를 정의할 때 readonly 키워드를 이용해 수정불가능 하도록 강제할 수도 있다.\n변수를 const로 정의한 것과 같은 효과를 볼 수 있다.\n불변한 값을 만들고 싶을 때 변수는 const 를 사용하고 프로퍼티는 readonly 를 사용하는 정도의 차이가 있다.\n1234567interface Point &#123;  readonly x: number;  readonly y: number;&#125;let p1: Point = &#123; x: 10, y: 20 &#125;;p1.x = 5; // 오류!\n\n함수함수에 인터페이스를 적용할 수 있다.\n인터페이스에서 함수가 가져야하는 인수의 타입, 반환값의 타입을 지정한다.\n123456interface func &#123;  (baseValue: number, increment: number): number;&#125;let myAdd: func = function(x: number, y: number): number &#123;  return x + y;&#125;;\n\n참조\nhttps://typescript-kr.github.io/pages/Interfaces.html\nhttps://hyunseob.github.io/2016/10/17/typescript-interface/\n\n","dateCreated":"2019-12-29T07:09:07+09:00","dateModified":"2019-12-29T07:09:42+09:00","datePublished":"2019-12-29T07:09:07+09:00","description":"type script에 대해 알아보자 (4) - interface\n","headline":"TypeScript-4","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"http://yoursite.com/2019/12/29/TypeScript-4/"},"publisher":{"@type":"Organization","name":"Junow","sameAs":["https://github.com/junow","mailto:taristmas@gmail.com"]},"url":"http://yoursite.com/2019/12/29/TypeScript-4/","keywords":"JavaScript, TypeScript"}</script>
     <meta name="description" content="type script에 대해 알아보자 (4) - interface">
 <meta property="og:type" content="blog">
 <meta property="og:title" content="TypeScript-4">
@@ -65,7 +65,7 @@
 
     
 
-<header id="header" data-behavior="5">
+<header id="header" data-behavior="4">
     <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
     <div class="header-title">
         <a
@@ -91,7 +91,7 @@
 
             <!-- Define author's picture -->
  
-<nav id="sidebar" data-behavior="5">
+<nav id="sidebar" data-behavior="4">
   <div class="sidebar-container">
      
     <ul class="sidebar-buttons">
@@ -173,7 +173,15 @@
       </li>
       
       <li class="sidebar-button">
-         <a class="sidebar-button-link "  href="/mailto%20taristmas@gmail.com" title="Mail" > 
+        
+        <a
+          class="sidebar-button-link "
+          href="mailto:taristmas@gmail.com"
+          target="_blank"
+          rel="noopener"
+          title="Mail"
+        >
+          
           <i
             class="sidebar-button-icon fa fa-envelope"
             aria-hidden="true"
@@ -190,7 +198,7 @@
 </nav>
 
             
-            <div id="main" data-behavior="5"
+            <div id="main" data-behavior="4"
                  class="
                         hasCoverMetaIn
                         ">
@@ -400,13 +408,13 @@
 
                 <footer id="footer" class="main-content-wrap">
     <span class="copyrights">
-        Copyrights &copy; 2019 Junow. All Rights Reserved.
+        Copyrights &copy; 2020 Junow. All Rights Reserved.
     </span>
 </footer>
 
             </div>
             
-                <div id="bottom-bar" class="post-bottom-bar" data-behavior="5">
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="4">
                     <div class="post-actions-wrap">
     <nav>
         <ul class="post-actions post-action-nav">
@@ -516,7 +524,7 @@
 
                 </div>
                 
-    <div id="share-options-bar" class="share-options-bar" data-behavior="5">
+    <div id="share-options-bar" class="share-options-bar" data-behavior="4">
         <i id="btn-close-shareoptions" class="fa fa-times"></i>
         <ul class="share-options">
             
@@ -593,7 +601,7 @@
 
         
         
-<div id="cover" style="background-image:url('/assets/images/cover-v1.2.0.jpg');"></div>
+<div id="cover" style="background-image:url('/assets/images/coke.jpeg');"></div>
         <!--SCRIPTS-->
 
 <script src="/assets/js/jquery.js"></script>

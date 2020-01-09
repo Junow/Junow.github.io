@@ -11,7 +11,7 @@
     
     
     
-    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Junow","sameAs":["https://github.com/junow","mailto taristmas@gmail.com"]},"articleBody":"list 의 key 에는 어떤값을 할당해주어야 할까\n\n\narray index 의 키\nkey 는 리액트가 어떤 아이템이 추가되고 변경되고 삭제되었는지를 알아채는데 도움을 준다.\n배열 내부 요소에 키를 지정하여 요소를 안정적으로 식별할 수 있어야한다.\nkey 를 지정하는 최고의 방법은 리스트의 아이템을 다른 아이템들 사이에서 유니트하게 식별할 수 있는 문자열로 지정하는 것이다. 대부분의 경우 아이템의 아이디를 데이터의 key 로 사용한다.\n안정적인 id 가 없는 경우 대부분 리스트의 인덱스를 key로 사용할 수도 있다. 하지만 리스트의 아이템의 순서가 바뀔수도 있는 경우 인덱스를 키로 사용하는 것은 추천하지 않는다.\n이는 성능에 부정적인 영향을 줄 수 있으며 컴포넌트의 state 에 이슈를 발생할 수 있다. 자세한 내용은 다음 링크를 참조 [in-depth explanation on the negative impacts of using an index as a key.]\n만약 명백한 키를 리스트 아이템의 키로 지정하지 않으면 리액트는 기본적으로 인덱스를 key 로 지정한다.\n\n아래는 Robin Pokorny의 index as a key is an anti-pattern 의 글을 번역했습니다.개발자들이 리스트를 렌더링 할때 아이템의 키를 인덱스로 지정하는 것을 많이 봤었습니다.\n123&#123;  todos.map((todo, index) =&gt; &lt;Todo &#123;...todo&#125; key=&#123;index&#125; /&gt;);&#125;\n\n이는 꽤 괜찮아 보이고 warning 을 제거할 수 있습니다. (지금은 index를 key로 써도 warning을 표시해준다.) 여기서 위험은 무엇일까요?\n\n이는 어플리케이션을 망가뜨리고 옳지않은 데이터를 보여줄 수도 있습니다.\n\n설명하자면, 리액트는 오직 key 를 가지고 DOM Element를 식별합니다. 만약 리스트에 새로운 아이템을 추가하거나 중간에 하나를 제거한다면 어떻게 될까요? 만약 key 값이 이전과 같다면 리액트는 DOM Element가 이전과 같은 component 를 나타낸다고 간주합니다. 실제로는 다른 데이터를 나타내는데도 말이죠.\n나은 방법각 항목에는 영구적이고 유니크한 속성 값이 있는것이 좋습니다. 이상적으로는 아이템이 생성되는 순간에 할당되어야 합니다. 물론 저는 지금 id 에 대해 이야기하고 있습니다. 그래서 다음과 같이 쓸 수 있겠네요.\n123&#123;  todos.map(todo =&gt; &lt;Todo &#123;...todo&#125; key=&#123;todo.id&#125; /&gt;);&#125;\n\n\n주의: 아이템이 이미 가지고 있는 값들 중 id 로 쓸만한 값이 있을지도 모릅니다.\n\n이렇게 한다면 번호매기기를 추상화에서 한단꼐 위로 끌어올릴 수 있습니다. 글로벌한 인덱스를 사용한다면 어떠한 두 아이템도 서로 다른 id를 가질 수 있습니다.\n12345678todoCounter = 1;function createNewTodo(text) &#123;  return &#123;    completed: false,    id: todoCounter++,    text  &#125;;&#125;\n\n더 나은 방법id 를 생산하는 솔루션은 아이템들을 분산적으로 생산할 수 있는 더욱 강력한 접근법을 사용해야 합니다. 그래서 저는 shortid 를 추천합니다. 이는 순차적이지 않고 짧은 URL 친화적인 고유 id 를 빠르게 생성합니다. 코드는 다음과 같습니다.\n12345678var shortid = require(\"shortid\");function createNewTodo(text) &#123;  return &#123;    completed: false,    id: shortid.generate(),    text  &#125;;&#125;\n\n업데이트: 예외적인 규칙많은 사람들이 정말 항상 id 를 생성해야 하냐고 묻습니다. 몇몇 다른사람들은 인덱스를 key 로 사용할 때 몇가지 유스케이스를 제안했습니다.\n때때로 새로운 id 를 생성하는것이 중복되어 피할 수 있는것은 사실입니다. 예를 들어 라이센스 조항 또는 기여자들의 목록 등. 결정을 돕기위해 이 예제가 공통적으로 갖는 세 가지 조건을 정리했습니다.\n\n리스트와 각 아이템들은 정적입니다. 이것들은 계산되지 않으며 변경되지 않습니다.\n리스트의 아이템들은 id를 갖지 않습니다.\n목록은 다시 정렬되거나 필터링 되지 않습니다.\n\n이러한 조건들이 모두 충족된다면 인덱스를 안전하게 key 로 사용할 수 있습니다.\n업데이트2: React, Preact, and *react여기는 잘 이해가 안됨;\n이 기사에서는 React에 대해 글을 썼지 만 문제는 독점적이지 않습니다. Preact와 같은 유사한 라이브러리에서도 위험이 존재합니다. 그러나 효과가 다를 수 있습니다. 마지막 요소가 사라지는 다음 StackOverflow 질문을 참조하십시오. 또한 Preact의 작성자 인 Jason Miller.가 제공 한 답변에 설명되어 있습니다.\n출처\nhttps://reactjs.org/docs/lists-and-keys.html#keys\nhttps://medium.com/@robinpokorny/index-as-a-key-is-an-anti-pattern-e0349aece318\n\n","dateCreated":"2019-12-29T07:14:31+09:00","dateModified":"2019-12-29T07:15:07+09:00","datePublished":"2019-12-29T07:14:31+09:00","description":"list 의 key 에는 어떤값을 할당해주어야 할까","headline":"React-Key-In-List","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"http://yoursite.com/2019/12/29/React-Key-In-List/"},"publisher":{"@type":"Organization","name":"Junow","sameAs":["https://github.com/junow","mailto taristmas@gmail.com"]},"url":"http://yoursite.com/2019/12/29/React-Key-In-List/","keywords":"React"}</script>
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Junow","sameAs":["https://github.com/junow","mailto:taristmas@gmail.com"]},"articleBody":"list 의 key 에는 어떤값을 할당해주어야 할까\n\n\narray index 의 키\nkey 는 리액트가 어떤 아이템이 추가되고 변경되고 삭제되었는지를 알아채는데 도움을 준다.\n배열 내부 요소에 키를 지정하여 요소를 안정적으로 식별할 수 있어야한다.\nkey 를 지정하는 최고의 방법은 리스트의 아이템을 다른 아이템들 사이에서 유니트하게 식별할 수 있는 문자열로 지정하는 것이다. 대부분의 경우 아이템의 아이디를 데이터의 key 로 사용한다.\n안정적인 id 가 없는 경우 대부분 리스트의 인덱스를 key로 사용할 수도 있다. 하지만 리스트의 아이템의 순서가 바뀔수도 있는 경우 인덱스를 키로 사용하는 것은 추천하지 않는다.\n이는 성능에 부정적인 영향을 줄 수 있으며 컴포넌트의 state 에 이슈를 발생할 수 있다. 자세한 내용은 다음 링크를 참조 [in-depth explanation on the negative impacts of using an index as a key.]\n만약 명백한 키를 리스트 아이템의 키로 지정하지 않으면 리액트는 기본적으로 인덱스를 key 로 지정한다.\n\n아래는 Robin Pokorny의 index as a key is an anti-pattern 의 글을 번역했습니다.개발자들이 리스트를 렌더링 할때 아이템의 키를 인덱스로 지정하는 것을 많이 봤었습니다.\n123&#123;  todos.map((todo, index) =&gt; &lt;Todo &#123;...todo&#125; key=&#123;index&#125; /&gt;);&#125;\n\n이는 꽤 괜찮아 보이고 warning 을 제거할 수 있습니다. (지금은 index를 key로 써도 warning을 표시해준다.) 여기서 위험은 무엇일까요?\n\n이는 어플리케이션을 망가뜨리고 옳지않은 데이터를 보여줄 수도 있습니다.\n\n설명하자면, 리액트는 오직 key 를 가지고 DOM Element를 식별합니다. 만약 리스트에 새로운 아이템을 추가하거나 중간에 하나를 제거한다면 어떻게 될까요? 만약 key 값이 이전과 같다면 리액트는 DOM Element가 이전과 같은 component 를 나타낸다고 간주합니다. 실제로는 다른 데이터를 나타내는데도 말이죠.\n나은 방법각 항목에는 영구적이고 유니크한 속성 값이 있는것이 좋습니다. 이상적으로는 아이템이 생성되는 순간에 할당되어야 합니다. 물론 저는 지금 id 에 대해 이야기하고 있습니다. 그래서 다음과 같이 쓸 수 있겠네요.\n123&#123;  todos.map(todo =&gt; &lt;Todo &#123;...todo&#125; key=&#123;todo.id&#125; /&gt;);&#125;\n\n\n주의: 아이템이 이미 가지고 있는 값들 중 id 로 쓸만한 값이 있을지도 모릅니다.\n\n이렇게 한다면 번호매기기를 추상화에서 한단꼐 위로 끌어올릴 수 있습니다. 글로벌한 인덱스를 사용한다면 어떠한 두 아이템도 서로 다른 id를 가질 수 있습니다.\n12345678todoCounter = 1;function createNewTodo(text) &#123;  return &#123;    completed: false,    id: todoCounter++,    text  &#125;;&#125;\n\n더 나은 방법id 를 생산하는 솔루션은 아이템들을 분산적으로 생산할 수 있는 더욱 강력한 접근법을 사용해야 합니다. 그래서 저는 shortid 를 추천합니다. 이는 순차적이지 않고 짧은 URL 친화적인 고유 id 를 빠르게 생성합니다. 코드는 다음과 같습니다.\n12345678var shortid = require(\"shortid\");function createNewTodo(text) &#123;  return &#123;    completed: false,    id: shortid.generate(),    text  &#125;;&#125;\n\n업데이트: 예외적인 규칙많은 사람들이 정말 항상 id 를 생성해야 하냐고 묻습니다. 몇몇 다른사람들은 인덱스를 key 로 사용할 때 몇가지 유스케이스를 제안했습니다.\n때때로 새로운 id 를 생성하는것이 중복되어 피할 수 있는것은 사실입니다. 예를 들어 라이센스 조항 또는 기여자들의 목록 등. 결정을 돕기위해 이 예제가 공통적으로 갖는 세 가지 조건을 정리했습니다.\n\n리스트와 각 아이템들은 정적입니다. 이것들은 계산되지 않으며 변경되지 않습니다.\n리스트의 아이템들은 id를 갖지 않습니다.\n목록은 다시 정렬되거나 필터링 되지 않습니다.\n\n이러한 조건들이 모두 충족된다면 인덱스를 안전하게 key 로 사용할 수 있습니다.\n업데이트2: React, Preact, and *react여기는 잘 이해가 안됨;\n이 기사에서는 React에 대해 글을 썼지 만 문제는 독점적이지 않습니다. Preact와 같은 유사한 라이브러리에서도 위험이 존재합니다. 그러나 효과가 다를 수 있습니다. 마지막 요소가 사라지는 다음 StackOverflow 질문을 참조하십시오. 또한 Preact의 작성자 인 Jason Miller.가 제공 한 답변에 설명되어 있습니다.\n출처\nhttps://reactjs.org/docs/lists-and-keys.html#keys\nhttps://medium.com/@robinpokorny/index-as-a-key-is-an-anti-pattern-e0349aece318\n\n","dateCreated":"2019-12-29T07:14:31+09:00","dateModified":"2019-12-29T07:15:07+09:00","datePublished":"2019-12-29T07:14:31+09:00","description":"list 의 key 에는 어떤값을 할당해주어야 할까","headline":"React-Key-In-List","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"http://yoursite.com/2019/12/29/React-Key-In-List/"},"publisher":{"@type":"Organization","name":"Junow","sameAs":["https://github.com/junow","mailto:taristmas@gmail.com"]},"url":"http://yoursite.com/2019/12/29/React-Key-In-List/","keywords":"React"}</script>
     <meta name="description" content="list 의 key 에는 어떤값을 할당해주어야 할까">
 <meta property="og:type" content="blog">
 <meta property="og:title" content="React-Key-In-List">
@@ -62,7 +62,7 @@
 
     
 
-<header id="header" data-behavior="5">
+<header id="header" data-behavior="4">
     <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
     <div class="header-title">
         <a
@@ -88,7 +88,7 @@
 
             <!-- Define author's picture -->
  
-<nav id="sidebar" data-behavior="5">
+<nav id="sidebar" data-behavior="4">
   <div class="sidebar-container">
      
     <ul class="sidebar-buttons">
@@ -170,7 +170,15 @@
       </li>
       
       <li class="sidebar-button">
-         <a class="sidebar-button-link "  href="/mailto%20taristmas@gmail.com" title="Mail" > 
+        
+        <a
+          class="sidebar-button-link "
+          href="mailto:taristmas@gmail.com"
+          target="_blank"
+          rel="noopener"
+          title="Mail"
+        >
+          
           <i
             class="sidebar-button-icon fa fa-envelope"
             aria-hidden="true"
@@ -187,7 +195,7 @@
 </nav>
 
             
-            <div id="main" data-behavior="5"
+            <div id="main" data-behavior="4"
                  class="
                         hasCoverMetaIn
                         ">
@@ -289,11 +297,14 @@
         <ul class="post-actions post-action-nav">
             <li class="post-action">
                 
-                    <a
-                        class="post-action-btn btn btn--disabled"
-                        aria-hidden="true"
-                    >
-                        
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2020/01/09/Execution-Context/"
+                    data-tooltip="Execution Context"
+                    aria-label="이전: Execution Context"
+                >
+                    
                         <i class="fa fa-angle-left" aria-hidden="true"></i>
                         <span class="hide-xs hide-sm text-small icon-ml">이전</span>
                     </a>
@@ -403,23 +414,26 @@
 
                 <footer id="footer" class="main-content-wrap">
     <span class="copyrights">
-        Copyrights &copy; 2019 Junow. All Rights Reserved.
+        Copyrights &copy; 2020 Junow. All Rights Reserved.
     </span>
 </footer>
 
             </div>
             
-                <div id="bottom-bar" class="post-bottom-bar" data-behavior="5">
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="4">
                     <div class="post-actions-wrap">
     <nav>
         <ul class="post-actions post-action-nav">
             <li class="post-action">
                 
-                    <a
-                        class="post-action-btn btn btn--disabled"
-                        aria-hidden="true"
-                    >
-                        
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2020/01/09/Execution-Context/"
+                    data-tooltip="Execution Context"
+                    aria-label="이전: Execution Context"
+                >
+                    
                         <i class="fa fa-angle-left" aria-hidden="true"></i>
                         <span class="hide-xs hide-sm text-small icon-ml">이전</span>
                     </a>
@@ -516,7 +530,7 @@
 
                 </div>
                 
-    <div id="share-options-bar" class="share-options-bar" data-behavior="5">
+    <div id="share-options-bar" class="share-options-bar" data-behavior="4">
         <i id="btn-close-shareoptions" class="fa fa-times"></i>
         <ul class="share-options">
             
@@ -593,7 +607,7 @@
 
         
         
-<div id="cover" style="background-image:url('/assets/images/cover-v1.2.0.jpg');"></div>
+<div id="cover" style="background-image:url('/assets/images/coke.jpeg');"></div>
         <!--SCRIPTS-->
 
 <script src="/assets/js/jquery.js"></script>

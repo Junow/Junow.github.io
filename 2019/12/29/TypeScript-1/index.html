@@ -11,7 +11,7 @@
     
     
     
-    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Junow","sameAs":["https://github.com/junow","mailto taristmas@gmail.com"]},"articleBody":"type script에 대해 알아보자 (1) - 설치\n\n\nNPM 으로 타입스크립트 설치1npm install -g typescript\n\n폴더를 하나 만들고 npm init 후 typescript 모듈 설치\n1234mkdir typescripttestnpm init -ycd typescripttestnpm install typescript --save-dev\n\npackage.json 의 scripts 항목에 typescript를 실행하는 스크립트 추가\n123456...\"scripts\": &#123;   \"tsc\":\"tsc\"   ...&#125;...\n\nsrc 폴더를 만들고 index.ts 파일을 추가\n앞으로 추가되는 모든 ts파일들은 이 폴더에 생성한다.\n12345678// .. /typescripttest/src/index.tsfunction greeter(person: string) &#123;  return \"Hello, \" + person;&#125;let user = \"Bojan\";let greeting = greeter(user);console.log(greeting);\n\n아래의 명령어로 typescript를 javascript 로 transpiling 할 수 있다.\n\n--outFile 옵션으로 결과물로 나온 파일의 위치, 이름을 지정가능\nsrc/index.ts 는 내가 transpiling 할 typescript 파일\n\n1npx tsc --outFile build/index.js src/index.ts\n\nbuild 폴더에 다음과같은 결과물 확인가능\n123456function greeter(person) &#123;  return \"Hello, \" + person;&#125;var user = \"junow\";var greeting = greeter(user);console.log(greeting);\n\n별도의 config 파일을 통해 설정값을 줄 수 있다.\n1npx tsc --init\n\ntsconfig.json 파일이 생기는데 여기다가 다양한 설정가능\n단순히 npx tsc 라고 터미널에 입력하면 프로젝트의 모든 .ts 파일을 같은 위치에 같은 이름으로 .js 파일로 변환하여 생성해준다.\ntsconfig.json 에 outDir을 통해 결과물을 저장할 폴더를 지정할 수 있다.\n1234// ./tsconfig.json...\"outDir\": \"./bundle/\",...\n\npackage.json에 script 추가\n1234...\"build-ts\" : \"tsc\",\"start\" : \"node bundle/index.js\"...\n\n이제 터미널에 npm run build-ts 하면 bundle 폴더에 결과물이 나올것이다.\n만약 다음과 같은 에러가 나온다면\n1234567../../node_modules/@types/babel__template/index.d.ts:16:28 - error TS2583: Cannot find name 'Set'. Do you need to change your target library? Try changing the `lib` compiler option to es2015 or later.16     placeholderWhitelist?: Set&lt;string&gt;;                              ~~~Found 1 error.\n\ntsconfig.json에 &quot;lib&quot;: [&quot;es2015&quot;],를 추가하자\n다음과 같은 에러가 나온다면\n1234567src/index.ts:7:1 - error TS2584: Cannot find name 'console'. Do you need to change your target library? Try changing the `lib` compiler option to include 'dom'.7 console.log(greeting);  ~~~~~~~Found 1 error.\n\ntsconfig.json에 &quot;lib&quot;: [&quot;es2015&quot;, &quot;dom&quot;],를 추가하자\n1npm run build-ts\n\nbundle 폴더에 결과물이 나온걸 확인할 수 있다.\n12345678// ./bundle/index.js\"use strict\";function greeter(person) &#123;  return \"Hello, \" + person;&#125;var user = \"junow\";var greeting = greeter(user);console.log(greeting);\n\nnpm run start 로 결과를 보자.\n123456npm run start&gt; typescripttest@1.0.0 start ... /typescripttest&gt; node bundle/index.jsHello, junow\n\n출처 : http://www.bojankomazec.com/2018/10/introduction-to-typescript.html\n","dateCreated":"2019-12-29T04:57:09+09:00","dateModified":"2019-12-29T06:54:28+09:00","datePublished":"2019-12-29T04:57:09+09:00","description":"type script에 대해 알아보자 (1) - 설치","headline":"TypeScript - 1","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"http://yoursite.com/2019/12/29/TypeScript-1/"},"publisher":{"@type":"Organization","name":"Junow","sameAs":["https://github.com/junow","mailto taristmas@gmail.com"]},"url":"http://yoursite.com/2019/12/29/TypeScript-1/","keywords":"JavaScript, TypeScript"}</script>
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Junow","sameAs":["https://github.com/junow","mailto:taristmas@gmail.com"]},"articleBody":"type script에 대해 알아보자 (1) - 설치\n\n\nNPM 으로 타입스크립트 설치1npm install -g typescript\n\n폴더를 하나 만들고 npm init 후 typescript 모듈 설치\n1234mkdir typescripttestnpm init -ycd typescripttestnpm install typescript --save-dev\n\npackage.json 의 scripts 항목에 typescript를 실행하는 스크립트 추가\n123456...\"scripts\": &#123;   \"tsc\":\"tsc\"   ...&#125;...\n\nsrc 폴더를 만들고 index.ts 파일을 추가\n앞으로 추가되는 모든 ts파일들은 이 폴더에 생성한다.\n12345678// .. /typescripttest/src/index.tsfunction greeter(person: string) &#123;  return \"Hello, \" + person;&#125;let user = \"Bojan\";let greeting = greeter(user);console.log(greeting);\n\n아래의 명령어로 typescript를 javascript 로 transpiling 할 수 있다.\n\n--outFile 옵션으로 결과물로 나온 파일의 위치, 이름을 지정가능\nsrc/index.ts 는 내가 transpiling 할 typescript 파일\n\n1npx tsc --outFile build/index.js src/index.ts\n\nbuild 폴더에 다음과같은 결과물 확인가능\n123456function greeter(person) &#123;  return \"Hello, \" + person;&#125;var user = \"junow\";var greeting = greeter(user);console.log(greeting);\n\n별도의 config 파일을 통해 설정값을 줄 수 있다.\n1npx tsc --init\n\ntsconfig.json 파일이 생기는데 여기다가 다양한 설정가능\n단순히 npx tsc 라고 터미널에 입력하면 프로젝트의 모든 .ts 파일을 같은 위치에 같은 이름으로 .js 파일로 변환하여 생성해준다.\ntsconfig.json 에 outDir을 통해 결과물을 저장할 폴더를 지정할 수 있다.\n1234// ./tsconfig.json...\"outDir\": \"./bundle/\",...\n\npackage.json에 script 추가\n1234...\"build-ts\" : \"tsc\",\"start\" : \"node bundle/index.js\"...\n\n이제 터미널에 npm run build-ts 하면 bundle 폴더에 결과물이 나올것이다.\n만약 다음과 같은 에러가 나온다면\n1234567../../node_modules/@types/babel__template/index.d.ts:16:28 - error TS2583: Cannot find name 'Set'. Do you need to change your target library? Try changing the `lib` compiler option to es2015 or later.16     placeholderWhitelist?: Set&lt;string&gt;;                              ~~~Found 1 error.\n\ntsconfig.json에 &quot;lib&quot;: [&quot;es2015&quot;],를 추가하자\n다음과 같은 에러가 나온다면\n1234567src/index.ts:7:1 - error TS2584: Cannot find name 'console'. Do you need to change your target library? Try changing the `lib` compiler option to include 'dom'.7 console.log(greeting);  ~~~~~~~Found 1 error.\n\ntsconfig.json에 &quot;lib&quot;: [&quot;es2015&quot;, &quot;dom&quot;],를 추가하자\n1npm run build-ts\n\nbundle 폴더에 결과물이 나온걸 확인할 수 있다.\n12345678// ./bundle/index.js\"use strict\";function greeter(person) &#123;  return \"Hello, \" + person;&#125;var user = \"junow\";var greeting = greeter(user);console.log(greeting);\n\nnpm run start 로 결과를 보자.\n123456npm run start&gt; typescripttest@1.0.0 start ... /typescripttest&gt; node bundle/index.jsHello, junow\n\n출처 : http://www.bojankomazec.com/2018/10/introduction-to-typescript.html\n","dateCreated":"2019-12-29T04:57:09+09:00","dateModified":"2019-12-29T06:54:28+09:00","datePublished":"2019-12-29T04:57:09+09:00","description":"type script에 대해 알아보자 (1) - 설치","headline":"TypeScript - 1","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"http://yoursite.com/2019/12/29/TypeScript-1/"},"publisher":{"@type":"Organization","name":"Junow","sameAs":["https://github.com/junow","mailto:taristmas@gmail.com"]},"url":"http://yoursite.com/2019/12/29/TypeScript-1/","keywords":"JavaScript, TypeScript"}</script>
     <meta name="description" content="type script에 대해 알아보자 (1) - 설치">
 <meta property="og:type" content="blog">
 <meta property="og:title" content="TypeScript - 1">
@@ -63,7 +63,7 @@
 
     
 
-<header id="header" data-behavior="5">
+<header id="header" data-behavior="4">
     <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
     <div class="header-title">
         <a
@@ -89,7 +89,7 @@
 
             <!-- Define author's picture -->
  
-<nav id="sidebar" data-behavior="5">
+<nav id="sidebar" data-behavior="4">
   <div class="sidebar-container">
      
     <ul class="sidebar-buttons">
@@ -171,7 +171,15 @@
       </li>
       
       <li class="sidebar-button">
-         <a class="sidebar-button-link "  href="/mailto%20taristmas@gmail.com" title="Mail" > 
+        
+        <a
+          class="sidebar-button-link "
+          href="mailto:taristmas@gmail.com"
+          target="_blank"
+          rel="noopener"
+          title="Mail"
+        >
+          
           <i
             class="sidebar-button-icon fa fa-envelope"
             aria-hidden="true"
@@ -188,7 +196,7 @@
 </nav>
 
             
-            <div id="main" data-behavior="5"
+            <div id="main" data-behavior="4"
                  class="
                         hasCoverMetaIn
                         ">
@@ -413,13 +421,13 @@
 
                 <footer id="footer" class="main-content-wrap">
     <span class="copyrights">
-        Copyrights &copy; 2019 Junow. All Rights Reserved.
+        Copyrights &copy; 2020 Junow. All Rights Reserved.
     </span>
 </footer>
 
             </div>
             
-                <div id="bottom-bar" class="post-bottom-bar" data-behavior="5">
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="4">
                     <div class="post-actions-wrap">
     <nav>
         <ul class="post-actions post-action-nav">
@@ -526,7 +534,7 @@
 
                 </div>
                 
-    <div id="share-options-bar" class="share-options-bar" data-behavior="5">
+    <div id="share-options-bar" class="share-options-bar" data-behavior="4">
         <i id="btn-close-shareoptions" class="fa fa-times"></i>
         <ul class="share-options">
             
@@ -603,7 +611,7 @@
 
         
         
-<div id="cover" style="background-image:url('/assets/images/cover-v1.2.0.jpg');"></div>
+<div id="cover" style="background-image:url('/assets/images/coke.jpeg');"></div>
         <!--SCRIPTS-->
 
 <script src="/assets/js/jquery.js"></script>
